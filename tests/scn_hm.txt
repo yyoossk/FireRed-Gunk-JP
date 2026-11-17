@@ -1,0 +1,25 @@
+STATE
+MON 0 7 33 0 0 0 20
+COUNT 1
+BAG tm 0 341 1
+SEED 2468ACE0
+hold R 48
+run 20
+hold R 64
+run 30
+hold D 2
+run 10
+tap A
+run 60
+SHOT a
+tap A
+run 60
+SHOT b
+tap A
+run 60
+tap A
+run 60
+tap A
+run 200
+LOG
+SHOT c

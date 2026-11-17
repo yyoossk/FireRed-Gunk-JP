@@ -1,0 +1,1 @@
+- [port] Berry Crush text speed: fixed (0x0814BC9A beq->bgt)
