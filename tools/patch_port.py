@@ -208,6 +208,8 @@ def alloc(data,align=4):
 def u32at(a): return struct.unpack_from('<I',rom,a-0x08000000)[0]
 MAPGROUPS=0x08311F70
 def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
+# --- 「これまでの あらすじ」を出さない (TryStartQuestLogPlayback: always continue directly)
+assert rd(0x08111AA6,2)==bytes.fromhex('0fd0'); w8(0x08111AA6,bytes.fromhex('0fe0'))
 # --- メニューから パソコン (start menu item 9)
 tramp(0x0806E51C,newsym['JpSetUpStartMenu_NormalField'])
 assert rd(0x0806EB00,4)==bytes.fromhex('00b50848'); tramp(0x0806EB00,newsym['JpStartMenu_FadeScreenIfLeavingOverworld'])
