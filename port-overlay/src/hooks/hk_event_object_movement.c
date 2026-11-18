@@ -98,6 +98,36 @@ static u8 LoadGunkFollowerPalette(void)
     return paletteNum;
 }
 
+// Vanilla bug: sObjectEventSpritePalettes ends with {} (tag 0), not OBJ_EVENT_PAL_TAG_NONE, so looking up an unknown
+// tag never stops (the shop's map view hangs on the follower's palette). Stop at the real end, and load the follower's own palette.
+extern const struct SpritePalette gJpObjectEventSpritePalettes[];
+u8 FindObjectEventPaletteIndexByTag(u16 tag)
+{
+    u8 i;
+
+    for (i = 0; gJpObjectEventSpritePalettes[i].data != NULL && gJpObjectEventSpritePalettes[i].tag != OBJ_EVENT_PAL_TAG_NONE; i++)
+    {
+        if (gJpObjectEventSpritePalettes[i].tag == tag)
+            return i;
+    }
+    return 0xFF;
+}
+
+void LoadObjectEventPalette(u16 paletteTag)
+{
+    u8 i;
+
+    if (paletteTag == OBJ_EVENT_PAL_TAG_GUNK_FOLLOWER)
+    {
+        if (sGunkFollowerPalette != NULL && IndexOfSpritePaletteTag(paletteTag) == 0xFF)
+            LoadGunkFollowerPalette();
+        return;
+    }
+    i = FindObjectEventPaletteIndexByTag(paletteTag);
+    if (i != 0xFF && IndexOfSpritePaletteTag(gJpObjectEventSpritePalettes[i].tag) == 0xFF)
+        LoadSpritePalette(&gJpObjectEventSpritePalettes[i]);
+}
+
 // FRLG+ Master Trainer overworld sprites (gfx 160-169); filled in by tools/patch_port.py
 #define JP_MASTER_GFX_FIRST 160
 extern const struct ObjectEventGraphicsInfo *const gJpMasterGfxPtrs[12];   // data/hooks/master_trainers.s

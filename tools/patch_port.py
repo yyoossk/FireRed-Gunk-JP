@@ -27,7 +27,7 @@ for line in subprocess.check_output(['arm-none-eabi-nm',PORT+'/pb/port.elf']).de
     if len(p)==3: newsym[p[2]]=int(p[0],16)
 end=CODE_BASE+len(blob)
 # 2. trampolines: replaced functions -> new versions
-HOOKS={'event_object_movement.o':['GetObjectEventGraphicsInfo','TrySetupObjectEventSprite','RemoveObjectEventsOutsideView','SpawnObjectEventOnReturnToField','ObjectEventSetGraphicsId','InitRunSlow'],
+HOOKS={'event_object_movement.o':['GetObjectEventGraphicsInfo','TrySetupObjectEventSprite','RemoveObjectEventsOutsideView','SpawnObjectEventOnReturnToField','ObjectEventSetGraphicsId','InitRunSlow','LoadObjectEventPalette','FindObjectEventPaletteIndexByTag'],
  'field_player_avatar.o':['PlayerNotOnBikeMoving','CanStopSurfing','PlayerJumpLedge'],
  'bike.o':['BikeTransition_MoveDirection','BikeTransition_Downhill','BikeTransition_Uphill'],
  'overworld.o':['LoadMapFromWarp','CB1_Overworld','InitObjectEventsLocal','ReloadObjectsAndRunReturnToFieldMapScript'],
@@ -308,5 +308,11 @@ for at,old_hw,new_hw in [(0x08122652,0x2811,0x2814),(0x08122862,0x2E11,0x2E14),(
 _tm=0x0820ADE8-0x08000000
 for sp in range(1,412):
     o=_tm+8*sp+4; struct.pack_into('<I',rom,o,struct.unpack_from('<I',rom,o)[0]|0x03FC0000)
+# 赤フルカラー: Celadon Dept. 2F TM clerk (object event script ptr)
+_n=0
+for _o in range(0,len(rom)-4,4):
+    if struct.unpack_from('<I',rom,_o)[0]==0x0818351A and rom[_o-0x10]==3:   # object template (localId 3) script field
+        struct.pack_into('<I',rom,_o,newsym['JpEventScript_CeladonTMClerk']); _n+=1
+print('celadon TM clerk refs',_n); assert _n>=1
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)
