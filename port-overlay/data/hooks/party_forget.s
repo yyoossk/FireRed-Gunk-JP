@@ -6,6 +6,8 @@
 	.include "asm/macros/event.inc"
 	.set YES, 1
 	.set NO, 0
+	.set FALSE, 0
+	.set TRUE, 1
 	.set SPECIAL_SelectMoveDeleterMove, 220
 	.set SPECIAL_MoveDeleterForgetMove, 221
 	.set SPECIAL_BufferMoveDeleterNicknameAndMove, 222
