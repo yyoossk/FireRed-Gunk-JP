@@ -27,7 +27,9 @@ for line in subprocess.check_output(['arm-none-eabi-nm',PORT+'/pb/port.elf']).de
     if len(p)==3: newsym[p[2]]=int(p[0],16)
 end=CODE_BASE+len(blob)
 # 2. trampolines: replaced functions -> new versions
-HOOKS={'event_object_movement.o':['GetObjectEventGraphicsInfo','TrySetupObjectEventSprite','RemoveObjectEventsOutsideView','SpawnObjectEventOnReturnToField','ObjectEventSetGraphicsId','InitRunSlow','LoadObjectEventPalette','FindObjectEventPaletteIndexByTag'],
+HOOKS={'dodrio_berry_picking.o':['FreeDodrioSprites'],'trade.o':['CanTradeSelectedMon'],'heal_location.o':['SetWhiteoutRespawnWarpAndHealerNpc'],'roamer.o':['CreateRoamerMonInstance'],'pokeball.o':['SpriteCB_TradePokeball'],
+ 'battle_ai_script_commands.o':['RecordLastUsedMoveByTarget','RecordAbilityBattle','RecordItemEffectBattle','Cmd_get_ability','Cmd_if_has_move','Cmd_if_doesnt_have_move','Cmd_if_has_move_with_effect','Cmd_if_doesnt_have_move_with_effect','Cmd_get_hold_effect'],
+ 'event_object_movement.o':['GetObjectEventGraphicsInfo','TrySetupObjectEventSprite','RemoveObjectEventsOutsideView','SpawnObjectEventOnReturnToField','ObjectEventSetGraphicsId','InitRunSlow','LoadObjectEventPalette','FindObjectEventPaletteIndexByTag'],
  'field_player_avatar.o':['PlayerNotOnBikeMoving','CanStopSurfing','PlayerJumpLedge'],
  'bike.o':['BikeTransition_MoveDirection','BikeTransition_Downhill','BikeTransition_Uphill'],
  'overworld.o':['LoadMapFromWarp','CB1_Overworld','InitObjectEventsLocal','ReloadObjectsAndRunReturnToFieldMapScript'],
@@ -36,7 +38,7 @@ HOOKS={'event_object_movement.o':['GetObjectEventGraphicsInfo','TrySetupObjectEv
  'field_control_avatar.o':['GetInteractedLinkPlayerScript','GetInteractedObjectEventScript'],
  'party_menu.o':['SetPartyMonFieldSelectionActions','Task_HandleChooseMonInput'],
  'daycare.o':['_TriggerPendingDaycareEgg','_TriggerPendingDaycareMaleEgg'],
- 'pokemon.o':['GetMoveRelearnerMoves','GetNumberOfRelearnableMoves'],
+ 'pokemon.o':['GetMoveRelearnerMoves','GetNumberOfRelearnableMoves','CreateMonWithIVsPersonality','ModifyStatByNature','CalculateMonStats'],
  'item.o':['SetBagPocketsPointers','ApplyNewEncryptionKeyToBagItems','ClearBag'],
  'item_menu.o':['ResetBagCursorPositions','All_CalculateNItemsAndMaxShowed','CalculateInitialCursorPosAndItemsAbove','UpdatePocketScrollPositions','PrintBagPocketName','ProcessPocketSwitchInput','SwitchPockets','Task_AnimateSwitchPockets','CreatePocketSwitchArrowPair','BackUpPlayerBag','RestorePlayerBag'],
  'item_menu_icons.o':['SetBagVisualPocketId'],
@@ -339,6 +341,34 @@ patch16(0x080D03DA,0x2002,0x2003); patch16(0x080D03DE,0x2800,0x2802); patch16(0x
 # so accuracy 0 would always miss. Treat accuracy 0 as "never misses" (covers EFFECT_ALWAYS_HIT / VITAL_THROW, which are all 0).
 for _a,_o,_n in [(0x0801D50A,0x7800,0x78C0),(0x0801D50C,0x2811,0x2800),(0x0801D50E,0xD001,0xD001),(0x0801D510,0x284E,0x46C0),(0x0801D512,0xD10F,0xE00F)]:
     patch16(_a,_o,_n)
+# pret BUGFIX: per-battler AI battle history lives after the vanilla struct -> allocate 0x58 instead of 0x30
+patch16(0x0802D828,0x2030,0x2058)
+# pret BUGFIX (binary): text window frame index bound 20 -> 10
+patch16(0x08068FF6,0x2813,0x2809)
+# pret BUGFIX: recordlastability skipped only 1 byte of its 2-byte command
+patch16(0x08025FA8,0x3001,0x3002)
+# pret BUGFIX: Pokedex category page flip passed the wrong value to the bg effect
+patch16(0x08106332,0x7888,0x2000)
+# pret BUGFIX: Oak's speech loaded 48 colours past the background palette
+patch16(0x08131526,0x22E0,0x2280)
+# pret BUGFIX: facility class pics for Agatha / Lance (were Lorelei / Bruno)
+assert rom[0x0020BAC8+147]==112 and rom[0x0020BAC8+148]==113; rom[0x0020BAC8+147]=114; rom[0x0020BAC8+148]=115
+# pret BUGFIX: Berry Crush sparkle amount 2 / 3 were written to the counter (only 0, 1, 4 reachable)
+for _a,_o,_n in [(0x0814C8A6,0x2002,0x2040),(0x0814C8A8,0x86A8,0xE009),(0x0814C8AA,0xE00D,0x46C0),(0x0814C8B6,0x2003,0x2060),(0x0814C8B8,0x86A8,0xE001),(0x0814C8BA,0xE005,0x46C0),
+                 (0x0814C8BC,0x7830,0x2080),(0x0814C8BE,0x211F,0x7831),(0x0814C8C0,0x4001,0x06C9),(0x0814C8C2,0x2080,0x0EC9)]:
+    patch16(_a,_o,_n)
+# pret BUGFIX: Dodrio Berry Picking - unshared columns for 5 players {1,3,5,6,9} -> {1,3,5,7,9}
+for _t in (0x0043B5AA,0x0043ED06):
+    _k=rom.find(bytes([1,3,5,6,9]),_t,_t+40); assert _k>0; rom[_k+3]=7
+# pret BUGFIX: Dodrio Berry Picking could start before every player was ready (loop index not reset)
+patch16(0x08155766,0x42AC,0x2401); patch16(0x08155768,0xD211,0x46C0)
+# pret BUGFIX: Wonder Card stamp icons were checked with the wrong sprite id
+patch16(0x081464A0,0x30D5,0x30D6)
+# pret BUGFIX: map name preview wrote its 3 text colours past the stack frame (into saved registers)
+patch16(0x080F93D0,0xB085,0xB086); patch16(0x080F944A,0xB005,0xB006)
+# pret BUGFIX: intro fight-scene sprite palette list had no terminator (LoadSpritePalettes read garbage after it)
+assert u32at(0x080EFBAC)==0x083CDA44
+w8(0x080EFBAC,struct.pack('<I',alloc(bytes(rom[0x003CDA44:0x003CDA44+40])+bytes(8))))
 # FRLG+ vanilla tile-error fixes (tilesets + small layout fixes)
 exec(open('/home/claude/tools/tile_fix.py').read())
 print('end of new data',hex(end))
