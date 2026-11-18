@@ -1,3 +1,4 @@
+import os
 import sys,struct,subprocess,re
 sys.path.insert(0,'/home/claude/tools')
 from syms import jp, us
@@ -20,6 +21,9 @@ blob=open(PORT+'/pb/port.bin','rb').read()
 CODE_BASE=0x08700000
 assert all(x==0xFF for x in rom[CODE_BASE-0x08000000:CODE_BASE-0x08000000+len(blob)+0x1000])
 w8(CODE_BASE,blob)
+if os.environ.get('V151'):   # 151匹揃う版: its own code/data far away, so the shared layout stays identical to the normal version
+    subprocess.check_call(['arm-none-eabi-objcopy','-O','binary','-j','.v151',PORT+'/pb/port.elf',PORT+'/pb/v151.bin'])
+    _v=open(PORT+'/pb/v151.bin','rb').read(); assert all(x==0xFF for x in rom[0xF80000:0xF80000+len(_v)]); rom[0xF80000:0xF80000+len(_v)]=_v
 # symbols of new image
 newsym={}
 for line in subprocess.check_output(['arm-none-eabi-nm',PORT+'/pb/port.elf']).decode().splitlines():
@@ -52,6 +56,7 @@ def tramp(at,target):
     code+=struct.pack('<I',target|1)
     w8(at,code); return len(code)
 import os
+if os.environ.get('V151'): HOOKS.setdefault('wild_encounter.o',[]).append('GetCurrentMapWildMonHeaderId')
 SKIP=set(os.environ.get('SKIP','').split(','))
 for f,names in HOOKS.items():
     for n in names:
@@ -371,5 +376,6 @@ assert u32at(0x080EFBAC)==0x083CDA44
 w8(0x080EFBAC,struct.pack('<I',alloc(bytes(rom[0x003CDA44:0x003CDA44+40])+bytes(8))))
 # FRLG+ vanilla tile-error fixes (tilesets + small layout fixes)
 exec(open('/home/claude/tools/tile_fix.py').read())
+if os.environ.get('V151'): exec(open('/home/claude/tools/v151_patch.py').read())
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)

@@ -5,7 +5,7 @@ PORT='/home/claude/port'
 JPROM='/home/claude/roms/Pocket Monsters - FireRed (Japan) (Rev 1).gba'
 CODE_BASE=0x08700000
 EWRAM_BASE=0x0203FE00
-objs=sorted(glob.glob(PORT+'/pb/*.o'))+sorted(glob.glob(PORT+'/gx/o/*.o'))
+objs=sorted(glob.glob(PORT+'/pb/*.o'))+sorted(glob.glob(PORT+'/gx/o/*.o'))+(sorted(glob.glob(PORT+'/pb151/*.o')) if os.environ.get('V151') else [])
 hint={'hk_eom':'event_object_movement.o','hk_bike':'bike.o','hk_overworld':'overworld.o','hk_load_save':'load_save.o',
       'hk_scrcmd':'scrcmd.o','hk_field_control_avatar':'field_control_avatar.o','hk_field_player_avatar':'field_player_avatar.o',
       'hk_trainer_see':'trainer_see.o','hk_party_menu':'party_menu.o'}
@@ -63,6 +63,7 @@ SECTIONS {{
   .rodata : {{ *(.rodata) *(.rodata.*) *(script_data) }}
   .data : {{ *(.data) }}
   rom_end = .;
+  .v151 0x08F80000 : {{ *(.v151text) *(.v151data) }}
   . = 0x{EWRAM_BASE:08X};
   ewram (NOLOAD) : {{ *(ewram_data) *(.bss) *(COMMON) }}
   ewram_end = .;

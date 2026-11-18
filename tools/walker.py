@@ -334,6 +334,9 @@ def compare(recs_en, recs_jp, out, maxshots=3):
 
 def _handle(self, rec=None):
     """deal with whatever interrupted walking: battle, text, warp fade"""
+    if self.k == 'en':
+        try: self.cmd(f'poke {self.sb1()+0x1000+2*0x20:08X} FA')
+        except Exception: pass
     for i in range(200):
         if self.idle(): return
         if self.in_battle():
@@ -687,3 +690,33 @@ def _party(self):
         out.append(dict(species=sp, level=b[84], hp=struct.unpack_from('<H', b, 86)[0], maxhp=struct.unpack_from('<H', b, 88)[0], moves=mv, pp=tuple(pp)))
     return out
 Game.party = _party
+
+def _dungeon(self, target, rec=None, explore=True, max_moves=40, exclude=()):
+    """depth-first through a multi-map dungeon using only warps the player can actually reach"""
+    tgt = mapid(target) if isinstance(target, str) else target
+    used = set((mapid(m) if isinstance(m, str) else m, i) for m, i in exclude); fixed = set(used); seen_maps = set()
+    for step in range(max_moves):
+        if not self.idle(): self.handle(rec)
+        cur = self.pos()[2:]
+        if cur == tgt: return True
+        if explore and cur not in seen_maps:
+            seen_maps.add(cur); self.explore(rec)
+        ws = self.events()['warps']
+        cands = []
+        for i, w in enumerate(ws):
+            dest = (w['grp'], w['num'])
+            if (cur, i) in used: continue
+            p = self.path(w['x'], w['y'])
+            if p is None and self.pos()[:2] != (w['x'], w['y']): continue
+            pri = 0 if dest == tgt else (1 if dest not in seen_maps else 2)
+            cands.append((pri, i, dest))
+        if not cands:
+            used = {u for u in used if u[0] != cur or u in fixed}   # allow re-use
+            continue
+        cands.sort()
+        pri, i, dest = cands[0]
+        used.add((cur, i))
+        self.warp_to(idx=i)
+        if not self.idle(): self.handle(rec)
+    return self.pos()[2:] == tgt
+Game.dungeon = _dungeon
