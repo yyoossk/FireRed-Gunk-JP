@@ -339,5 +339,7 @@ patch16(0x080D03DA,0x2002,0x2003); patch16(0x080D03DE,0x2800,0x2802); patch16(0x
 # so accuracy 0 would always miss. Treat accuracy 0 as "never misses" (covers EFFECT_ALWAYS_HIT / VITAL_THROW, which are all 0).
 for _a,_o,_n in [(0x0801D50A,0x7800,0x78C0),(0x0801D50C,0x2811,0x2800),(0x0801D50E,0xD001,0xD001),(0x0801D510,0x284E,0x46C0),(0x0801D512,0xD10F,0xE00F)]:
     patch16(_a,_o,_n)
+# FRLG+ vanilla tile-error fixes (tilesets + small layout fixes)
+exec(open('/home/claude/tools/tile_fix.py').read())
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)
