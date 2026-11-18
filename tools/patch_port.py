@@ -186,6 +186,9 @@ assert rd(0x08108F28,4)==struct.pack('<I',0x285); w8(0x08108F28,struct.pack('<I'
 assert rd(0x0810A6C2,4)==bl_bytes(0x0810A6C2,0x0810A380); bl(0x0810A6C2,newsym['Island_OpenContextMenu'])
 for it in [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 44, 45, 63, 64, 65, 66, 67, 68, 69, 70, 71]: assert rom[0x39BEB8+40*it+22]==1, it; rom[0x39BEB8+40*it+22]=12
 for it in [179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 254, 255, 256, 257, 258]: assert rom[0x39BEB8+40*it+22]==1, it; rom[0x39BEB8+40*it+22]=13
+# --- FRLG+ event tickets: the diploma gives the しんぴのチケット (after the National Pokédex)
+assert rd(0x081845CF,6)==bytes.fromhex('250801276c02')
+w8(0x081845CF,bytes([0x05])+struct.pack('<I',newsym['EventScript_JpDiploma'])+bytes([0x02]))
 # --- reusable TMs (Gunk #7): JP Task_LearnedMove keeps the TM
 patch16(0x08126516,0xD803,0xE003)
 # 3. party menu: new cursor option table with WALK/RETURN before the field moves
