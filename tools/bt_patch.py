@@ -5,7 +5,17 @@ BTTS = '/home/claude/port/data/hooks/btts/'
 JP_GROUP = 42                       # appended to gMapGroup_IndoorSevenIslandRoute (1 map) -> nums 1..5
 JP_LAYOUTS, JP_NLAYOUTS = 0x0830E454, 383
 JP_GENERAL, JP_BUILDING, JP_SILPHCO = 0x0829435C, 0x0829447C, 0x08294794
-MUS_BT = 344                        # MUS_TRAINER_TOWER (the RS song is not in FRLG)
+# Ruby/Sapphire Battle Tower BGM (extracted from JP Ruby by tools/gen_rs_music.py) -> new song id 347
+import json as _json
+_sb=open('/home/claude/port/sound/rs_btower/song.bin','rb').read(); _sj=_json.load(open('/home/claude/port/sound/rs_btower/song.json'))
+_sa=alloc(_sb)
+for _f in _sj['fixups']:
+    struct.pack_into('<I',rom,_sa-0x08000000+_f,_sa+struct.unpack_from('<I',_sb,_f)[0])
+_ST=0x08463708; _NS=347
+_nt=alloc(bytes(rom[_ST-0x08000000:_ST-0x08000000+8*_NS])+struct.pack('<IHH',_sa+_sj['header'],*_sj['ms']))
+for _r in (0x081C0C94,0x081C0CC8,0x081C0D14,0x081C0D68,0x081C0D9C):
+    assert u32at(_r)==_ST; w8(_r,struct.pack('<I',_nt))
+MUS_BT = _NS
 MAPSEC_BATTLE_FRONTIER = 0x3A
 
 def bt_apply():
