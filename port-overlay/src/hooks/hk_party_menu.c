@@ -108,6 +108,7 @@ enum
     CURSOR_OPTION_TRADE2,
     CURSOR_OPTION_GUNK_WALK,
     CURSOR_OPTION_GUNK_RETURN,
+    CURSOR_OPTION_JP_FORGET,
     CURSOR_OPTION_FIELD_MOVES,
 };
 
@@ -131,6 +132,12 @@ void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
     else if (Gunk_CanMonWalk(&mons[slotId]))
     {
         AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, CURSOR_OPTION_GUNK_WALK);
+        maxFieldMoves--;
+    }
+    // 赤フルカラー: forget any move (HMs included) from the party menu
+    if (!GetMonData(&mons[slotId], MON_DATA_IS_EGG) && GetMonData(&mons[slotId], MON_DATA_MOVE2) != MOVE_NONE)
+    {
+        AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, CURSOR_OPTION_JP_FORGET);
         maxFieldMoves--;
     }
     for (i = 0; i < MAX_MON_MOVES && numFieldMoves < maxFieldMoves; ++i)
@@ -182,6 +189,32 @@ void CursorCB_GunkReturn(u8 taskId)
     Task_ClosePartyMenu(taskId);
 }
 
+extern const u8 JpEventScript_PartyForgetMove[];
+static void JpForget_FieldCB(void)
+{
+    ScriptContext_SetupScript(JpEventScript_PartyForgetMove);
+    ScriptContext_Stop();
+    FieldCB_ContinueScriptHandleMusic();
+}
+
+static void CB2_JpForgetStart(void)
+{
+    ShowSelectMovePokemonSummaryScreen(gPlayerParty, gSpecialVar_0x8004, gPlayerPartyCount - 1, CB2_ReturnToField, 0);
+    SetPokemonSummaryScreenMode(PSS_MODE_FORGET_MOVE);
+    gFieldCallback = JpForget_FieldCB;
+}
+
+void CursorCB_JpForget(u8 taskId)
+{
+    PlaySE(SE_SELECT);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+    gSpecialVar_0x8004 = gPartyMenu.slotId;
+    gPartyMenu.exitCallback = CB2_JpForgetStart;
+    Task_ClosePartyMenu(taskId);
+}
+
+const u8 gText_JpForget[] = _("わすれさせる");
 const u8 gText_GunkWalk[] = _("つれあるく");
 const u8 gText_GunkReturn[] = _("もどす");
 

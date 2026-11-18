@@ -291,18 +291,18 @@ patch16(0x08126516,0xD803,0xE003)
 a,old=jp('sCursorOptions','party_menu.o')
 NOPT_OLD=18+12
 tbl=bytes(rom[old-0x08000000:old-0x08000000+8*NOPT_OLD])
-new=tbl[:8*18]+struct.pack('<II',newsym['gText_GunkWalk'],newsym['CursorCB_GunkWalk']|1)+struct.pack('<II',newsym['gText_GunkReturn'],newsym['CursorCB_GunkReturn']|1)+tbl[8*18:]
+new=tbl[:8*18]+struct.pack('<II',newsym['gText_GunkWalk'],newsym['CursorCB_GunkWalk']|1)+struct.pack('<II',newsym['gText_GunkReturn'],newsym['CursorCB_GunkReturn']|1)+struct.pack('<II',newsym['gText_JpForget'],newsym['CursorCB_JpForget']|1)+tbl[8*18:]
 end=(end+3)&~3; newtbl=end; w8(newtbl,new); end+=len(new)
 # repoint references (literal pools in code region)
 cnt=0
 for off in range(0,0x01E0000,4):
     w=struct.unpack_from('<I',rom,off)[0]
     if old<=w<old+8*NOPT_OLD:
-        d=w-old; nd=d if d<8*18 else d+16
+        d=w-old; nd=d if d<8*18 else d+24
         struct.pack_into('<I',rom,off,newtbl+nd); cnt+=1; print('  repoint',hex(off+0x08000000),hex(w),'->',hex(newtbl+nd))
 print('table refs repointed',cnt)
 # immediates CURSOR_OPTION_FIELD_MOVES 18 -> 20
-for at,old_hw,new_hw in [(0x08122652,0x2811,0x2813),(0x08122862,0x2E11,0x2E13),(0x081228C8,0x3812,0x3814),(0x08124E70,0x3812,0x3814)]:
+for at,old_hw,new_hw in [(0x08122652,0x2811,0x2814),(0x08122862,0x2E11,0x2E14),(0x081228C8,0x3812,0x3815),(0x08124E70,0x3812,0x3815)]:
     cur=struct.unpack_from('<H',rom,at-0x08000000)[0]; assert cur==old_hw,(hex(at),hex(cur)); struct.pack_into('<H',rom,at-0x08000000,new_hw)
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)
