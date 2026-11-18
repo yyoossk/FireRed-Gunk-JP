@@ -60,3 +60,14 @@ Island_EggPidHigh:
 	bx ip
 	.word JpEggPidHigh
 	.thumb
+	.align 2
+	.global Island_OpenContextMenu
+	.thumb_func
+Island_OpenContextMenu:
+	bx pc
+	nop
+	.arm
+	ldr ip, [pc]
+	bx ip
+	.word JpOpenContextMenuWrapper
+	.thumb

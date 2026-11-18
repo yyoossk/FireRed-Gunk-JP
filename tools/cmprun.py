@@ -11,7 +11,7 @@ def ptrs(k,state):
     sb1,sb2=[struct.unpack('<I',b)[0] for b in run(R['rom'],['ls '+state,f'peek {R["sb1"]:08X} 4',f'peek {R["sb1"]+4:08X} 4'])]
     key=struct.unpack('<H',run(R['rom'],['ls '+state,f'peek {sb2+0xF20:08X} 2'])[0])[0]
     return sb1,sb2,key
-POCKET={'items':0x310,'key':0x3B8,'balls':0x430,'tm':0x464,'berries':0x54C}
+POCKET={'items':0x310,'key':0x3B8,'balls':0x430,'tm':0x464,'berries':0x54C,'med':0x348C,'held':0x352C}
 def build(scn,k,states,tag):
     R=ROMS[k]; out=[]; P=None
     for line in scn.splitlines():
@@ -55,6 +55,8 @@ def build(scn,k,states,tag):
     for line in r.stdout.splitlines():
         if ':' not in line: continue
         b=bytes(int(x,16) for x in line.split(':')[1].split())
+        if len(b)<576:
+            logs.append(b.hex()); continue
         s=[]
         for i in range(16):
             o=b[i*36:(i+1)*36]

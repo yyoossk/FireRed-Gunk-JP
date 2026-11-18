@@ -36,7 +36,10 @@ HOOKS={'event_object_movement.o':['GetObjectEventGraphicsInfo','TrySetupObjectEv
  'field_control_avatar.o':['GetInteractedLinkPlayerScript','GetInteractedObjectEventScript'],
  'party_menu.o':['SetPartyMonFieldSelectionActions','Task_HandleChooseMonInput'],
  'daycare.o':['_TriggerPendingDaycareEgg','_TriggerPendingDaycareMaleEgg'],
- 'pokemon.o':['GetMoveRelearnerMoves','GetNumberOfRelearnableMoves']}
+ 'pokemon.o':['GetMoveRelearnerMoves','GetNumberOfRelearnableMoves'],
+ 'item.o':['SetBagPocketsPointers','ApplyNewEncryptionKeyToBagItems','ClearBag'],
+ 'item_menu.o':['ResetBagCursorPositions','All_CalculateNItemsAndMaxShowed','CalculateInitialCursorPosAndItemsAbove','UpdatePocketScrollPositions','PrintBagPocketName','ProcessPocketSwitchInput','SwitchPockets','Task_AnimateSwitchPockets','CreatePocketSwitchArrowPair','BackUpPlayerBag','RestorePlayerBag'],
+ 'item_menu_icons.o':['SetBagVisualPocketId']}
 def tramp(at,target):
     code=b''
     if at%4: code+=struct.pack('<H',0x46C0)       # nop to align
@@ -169,6 +172,20 @@ for name,at in [('DoubleEdge', 135957236), ('ThunderWave', 135957340), ('RockSli
     w8(at+5,struct.pack('<I',newsym['EventScript_JpReteach_'+name]))
 assert rd(0x081A9280,3)==bytes.fromhex('ca0f00') and rd(0x081A9283,4)==struct.pack('<I',0x081938E7)
 w8(0x081A9283,struct.pack('<I',newsym['Text_JpTutorOnceFree']))
+# --- FRLG+ bag pockets くすり/もちもの (JP menu indices 11/12, pocket ids 12/13; see hk_bag.c)
+NEWBAGPOCKETS=newsym['gBagPockets']; NEWBAGSTATE=newsym['gBagMenuState']
+for at in range(0x08000000,0x08300000,4):
+    w=struct.unpack_from('<I',rom,at-0x08000000)[0]
+    if w in (0x020397D8,0x020397F0,0x020397F8):
+        w8(at,struct.pack('<I',NEWBAGPOCKETS+(w-0x020397D8)))
+    elif w in (0x0203AC74,0x0203AC7A,0x0203AC7C,0x0203AC82):
+        w8(at,struct.pack('<I',NEWBAGSTATE+(w-0x0203AC74)))
+patch16(0x081088D6,0x2014,0x201C)                 # GoToBagMenu: Alloc(sizeof BagMenuAlloc) 20 -> 28
+patch16(0x08108F00,0x20AC,0x20D4)                 # list items: 43 -> 53 entries (52 held items + CLOSE)
+assert rd(0x08108F28,4)==struct.pack('<I',0x285); w8(0x08108F28,struct.pack('<I',53*15))
+assert rd(0x0810A6C2,4)==bl_bytes(0x0810A6C2,0x0810A380); bl(0x0810A6C2,newsym['Island_OpenContextMenu'])
+for it in [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 44, 45, 63, 64, 65, 66, 67, 68, 69, 70, 71]: assert rom[0x39BEB8+40*it+22]==1, it; rom[0x39BEB8+40*it+22]=12
+for it in [179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 254, 255, 256, 257, 258]: assert rom[0x39BEB8+40*it+22]==1, it; rom[0x39BEB8+40*it+22]=13
 # --- reusable TMs (Gunk #7): JP Task_LearnedMove keeps the TM
 patch16(0x08126516,0xD803,0xE003)
 # 3. party menu: new cursor option table with WALK/RETURN before the field moves
