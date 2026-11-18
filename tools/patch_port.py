@@ -198,6 +198,9 @@ for it in [179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192,
 # --- FRLG+ event tickets: the diploma gives the しんぴのチケット (after the National Pokédex)
 assert rd(0x081845CF,6)==bytes.fromhex('250801276c02')
 w8(0x081845CF,bytes([0x05])+struct.pack('<I',newsym['EventScript_JpDiploma'])+bytes([0x02]))
+# the diploma reloads the map: Celadon Condominiums 3F gets an ON_FRAME script that continues after it (VAR_TEMP_0 == 2)
+assert r32(0x08310BAC+8)==0x0818457A and rom[0x18457A]==0
+w8(0x08310BAC+8,struct.pack('<I',newsym['JpCondo3F_MapScripts']))
 # --- FRLG+ Gym Leader rematches at the Seven Island house (hk_battle_house.c, battle_house.s)
 ALLOC=[0x08B80000]
 def alloc(data,align=4):
