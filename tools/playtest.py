@@ -16,7 +16,7 @@ def run_segment(name, prev, plan):
         if isinstance(prev, dict): src = f'{ST}/{prev[k]}_{k}.ss'
         g = Game(k, src)
         g.run(5)
-        if k == 'en': g.boost()
+        if k == 'en' or os.environ.get('BOOST_ALL'): g.boost()
         rec = []
         try:
             plan(g, rec)

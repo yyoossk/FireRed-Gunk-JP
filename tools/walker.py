@@ -4,13 +4,16 @@
 import subprocess, struct, os, collections, time
 
 ROMS = {
-    'jp': dict(rom='/home/claude/work/port.gba', sb1=0x03004FA8, vmap=0x03004FE0, main=0x03003090, mapheader=0x02036D30,
+    'jp': dict(rom=os.environ.get('WALK_ROM','/home/claude/work/port.gba'), strbuf=0x02021C88, sb1=0x03004FA8, vmap=0x03004FE0, main=0x03003090, mapheader=0x02036D30,
                objs=0x02036D6C, avatar=0x02036FAC, ctx=0x03000EA8, battlecb=0x0801092D, owcb=0x08055E51,
                party=0x020241E4, cnt=0x02023F89, bmons=0x02023B44, bcf=0x03004F80, moves=0x08208E24, act=0x0802DB81, mv=0x0802E159, tgt=0x0802DDBD, fade=0x020379EC, btype=0x02022AAC, outcome=0x02023DEA),
-    'en': dict(rom='/home/claude/gunk/pokefirered_release.gba', sb1=0x03005008, vmap=0x03005040, main=0x030030F0, mapheader=0x02036E14,
+    'en': dict(rom='/home/claude/gunk/pokefirered_release.gba', strbuf=0x02021D18, sb1=0x03005008, vmap=0x03005040, main=0x030030F0, mapheader=0x02036E14,
                objs=0x02036E50, avatar=0x02037090, ctx=0x03000EA8, battlecb=0x08011199, owcb=0x08056A55,
                party=0x02024284, cnt=0x02024029, bmons=0x02023be4, bcf=0x03004FE0, moves=0x08252d30, act=0x0802E565, mv=0x0802EB85, tgt=0x0802E7E9, fade=0x02037B40, btype=0x02022B4C, outcome=0x02023E8A),
 }
+ROMS['fp'] = dict(rom='/home/claude/frlgplus/pokefirered.gba', strbuf=0x02021C98, sb1=0x0300500C, vmap=0x03005040, main=0x030030F0, mapheader=0x02036F18,
+               objs=0x02036F58, avatar=0x02037198, ctx=0x03000EA8, battlecb=0x080116B5, owcb=0x080598E1,
+               party=0x02024204, cnt=0x02023FA9, bmons=0x02023B64, bcf=0x03004FE0, moves=0x082788B0, act=0x0802F4A9, mv=0x0802FAE1, tgt=0x0802F745, fade=0x02037BD8, btype=0x02022ACC, outcome=0x02023E0A)
 DIRS = {'U': (0, -1), 'D': (0, 1), 'L': (-1, 0), 'R': (1, 0)}
 
 class Game:
@@ -720,3 +723,30 @@ def _dungeon(self, target, rec=None, explore=True, max_moves=40, exclude=()):
         if not self.idle(): self.handle(rec)
     return self.pos()[2:] == tgt
 Game.dungeon = _dungeon
+
+
+def _teleport(self, name, x, y):
+    """warp anywhere: a one-command script in gStringVar4 run by the global script context"""
+    grp, num = mapid(name); buf = self.R['strbuf'] + 0x200
+    data = bytes([0x39, grp, num, 0xFF]) + struct.pack('<hh', x, y) + b'\x02'
+    for i, b in enumerate(data): self.cmd(f'poke {buf + i:08X} {b:02X}')
+    for a, v in ((0x03000EB1, b'\x01'), (0x03000EB0, b'\x00'), (0x03000EB8, struct.pack('<I', buf)), (0x03000EA8, b'\x00')):
+        for i, b in enumerate(v): self.cmd(f'poke {a + i:08X} {b:02X}')
+    for i in range(40):
+        self.run(20)
+        if self.pos()[2:] == (grp, num) and self.idle(): break
+    self.run(60)
+    return self.pos()
+Game.teleport = _teleport
+def _setflag(self, f, on=True):
+    a = self.sb1() + 0xEE0 + f // 8; v = self.u8(a)
+    self.cmd(f'poke {a:08X} {((v | (1 << (f % 8))) if on else (v & ~(1 << (f % 8)))) & 0xFF:02X}')
+Game.setflag = _setflag
+def _getflag(self, f): return (self.u8(self.sb1() + 0xEE0 + f // 8) >> (f % 8)) & 1
+Game.getflag = _getflag
+def _setvar(self, v, val):
+    a = self.sb1() + 0x1000 + 2 * (v - 0x4000)
+    for i, b in enumerate(struct.pack('<H', val)): self.cmd(f'poke {a + i:08X} {b:02X}')
+Game.setvar = _setvar
+def _getvar(self, v): return self.u16(self.sb1() + 0x1000 + 2 * (v - 0x4000))
+Game.getvar = _getvar
