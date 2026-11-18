@@ -335,5 +335,9 @@ for _m in (0x359,0x35A):
 # FRLG+ vanilla fix: evolution move-learning glitch (A+B on the same frame at "make room for ..." gave a black screen):
 # the B check now only fires when A was not pressed this frame
 patch16(0x080D03DA,0x2002,0x2003); patch16(0x080D03DE,0x2800,0x2802); patch16(0x080D03E0,0xD100,0xD000)
+# companion to the --- accuracy fix: Charge/Conversion 2/Helping Hand/Recycle/Snatch still run a full accuracy check,
+# so accuracy 0 would always miss. Treat accuracy 0 as "never misses" (covers EFFECT_ALWAYS_HIT / VITAL_THROW, which are all 0).
+for _a,_o,_n in [(0x0801D50A,0x7800,0x78C0),(0x0801D50C,0x2811,0x2800),(0x0801D50E,0xD001,0xD001),(0x0801D510,0x284E,0x46C0),(0x0801D512,0xD10F,0xE00F)]:
+    patch16(_a,_o,_n)
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)
