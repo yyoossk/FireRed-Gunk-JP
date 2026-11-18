@@ -98,6 +98,11 @@ static u8 LoadGunkFollowerPalette(void)
     return paletteNum;
 }
 
+// FRLG+ Master Trainer overworld sprites (gfx 160-169); filled in by tools/patch_port.py
+#define JP_MASTER_GFX_FIRST 160
+extern const struct ObjectEventGraphicsInfo *const gJpMasterGfxPtrs[10];   // data/hooks/master_trainers.s
+void JpMaster_AdjustSpawn(struct ObjectEvent *objectEvent, const struct ObjectEventTemplate *template, struct SpriteTemplate *spriteTemplate);
+
 const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u8 graphicsId)
 {
     if (graphicsId >= OBJ_EVENT_GFX_VARS)
@@ -105,6 +110,9 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u8 graphicsId)
 
     if (graphicsId == OBJ_EVENT_GFX_GUNK_FOLLOWER && sGunkFollowerGfxInfo.images != NULL)
         return &sGunkFollowerGfxInfo;
+
+    if (graphicsId >= JP_MASTER_GFX_FIRST && graphicsId < JP_MASTER_GFX_FIRST + 10)
+        return gJpMasterGfxPtrs[graphicsId - JP_MASTER_GFX_FIRST];
 
     if (graphicsId >= NUM_OBJ_EVENT_GFX)
         graphicsId = OBJ_EVENT_GFX_LITTLE_BOY;
@@ -125,6 +133,7 @@ u8 TrySetupObjectEventSprite(const struct ObjectEventTemplate *objectEventTempla
         return OBJECT_EVENTS_COUNT;
 
     objectEvent = &gObjectEvents[objectEventId];
+    JpMaster_AdjustSpawn(objectEvent, objectEventTemplate, spriteTemplate);
     graphicsInfo = GetObjectEventGraphicsInfo(objectEvent->graphicsId);
     if (graphicsInfo->paletteSlot == PALSLOT_PLAYER)
         LoadPlayerObjectReflectionPalette(graphicsInfo->paletteTag, graphicsInfo->paletteSlot);

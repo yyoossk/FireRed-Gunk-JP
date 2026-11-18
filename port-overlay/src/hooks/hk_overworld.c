@@ -71,10 +71,12 @@ void CB2_Overworld(void);
 struct InitialPlayerAvatarState { u8 transitionFlags; u8 direction; bool8 hasDirectionSet; };
 struct InitialPlayerAvatarState *GetInitialPlayerAvatarState(void);
 
+void JpMaster_SyncHideFlag(void);
 void LoadMapFromWarp(bool32 unused)
 {
     bool8 isOutdoors;
 
+    JpMaster_SyncHideFlag();
     DespawnFollowerSprite();
     LoadCurrentMapData();
     LoadObjEventTemplatesFromHeader();

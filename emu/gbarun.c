@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <mgba/internal/arm/arm.h>
 static struct mCore* core; static mColor* buf; static unsigned W=240,H=160;
 static int keymask(const char* s){int k=0; for(;*s;s++){switch(*s){case 'A':k|=1;break;case 'B':k|=2;break;case 's':k|=4;break;case 'S':k|=8;break;case 'R':k|=16;break;case 'L':k|=32;break;case 'U':k|=64;break;case 'D':k|=128;break;case 'r':k|=256;break;case 'l':k|=512;break;}} return k;}
 static void shot(const char* fn){FILE* f=fopen(fn,"wb"); png_structp p=png_create_write_struct(PNG_LIBPNG_VER_STRING,0,0,0); png_infop i=png_create_info_struct(p); png_init_io(p,f);
@@ -40,6 +41,7 @@ int main(int argc,char**argv){
     else if(!strcmp(cmd,"pokeptr")){char a3[64]="";sscanf(line,"%*s %*s %*s %63s",a3);unsigned p=strtoul(a1,0,16); unsigned base=core->busRead32(core,p); core->busWrite8(core,base+strtoul(a2,0,16),strtoul(a3,0,16));}
     else if(!strcmp(cmd,"orptr")){char a3[64]="";sscanf(line,"%*s %*s %*s %63s",a3);unsigned p=strtoul(a1,0,16); unsigned base=core->busRead32(core,p); unsigned ad=base+strtoul(a2,0,16); core->busWrite8(core,ad,core->busRead8(core,ad)|strtoul(a3,0,16));}
     else if(!strcmp(cmd,"reset")) core->reset(core);
+    else if(!strcmp(cmd,"regs")){struct ARMCore* c=core->cpu; printf("REGS:"); for(int i=0;i<16;i++) printf(" %08X",c->gprs[i]); printf("\n"); fflush(stdout);}
     else if(!strcmp(cmd,"pc")){printf("frame %u\n",core->frameCounter(core)); fflush(stdout);}
   }
 

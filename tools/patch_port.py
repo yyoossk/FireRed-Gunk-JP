@@ -273,11 +273,14 @@ for k,src in enumerate([414,415,416,417,418,420,419]):
     e[0x18]=6
     struct.pack_into('<I',e,0x1C,newsym['gJpRematchVanillaParties']+k*6*16)
     tr+=e
+exec(open('/home/claude/tools/master_patch.py').read())
+tr+=master_trainer_entries()
 NEWTR=alloc(tr)
 for at in range(0x08000000,0x08300000,4):
     w=u32at(at)
     if w in (OLDTR,OLDTR+4,OLDTR+0xA): w8(at,struct.pack('<I',NEWTR+(w-OLDTR)))
 assert rd(0x0800F8B8,4)==bl_bytes(0x0800F8B8,0x08010B0C); bl(0x0800F8B8,newsym['Island_TrainerParty'])
+master_apply()
 # --- reusable TMs (Gunk #7): JP Task_LearnedMove keeps the TM
 patch16(0x08126516,0xD803,0xE003)
 # 3. party menu: new cursor option table with WALK/RETURN before the field moves

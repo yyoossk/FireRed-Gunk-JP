@@ -82,3 +82,25 @@ Island_TrainerParty:
 	bx ip
 	.word JpCreateNPCTrainerPartyWrapper
 	.thumb
+	.align 2
+	.global Island_MasterItemBlock
+	.thumb_func
+Island_MasterItemBlock:
+	bx pc
+	nop
+	.arm
+	ldr ip, [pc]
+	bx ip
+	.word JpMaster_ItemBlock
+	.thumb
+	.align 2
+	.global Island_MasterEndDefeated
+	.thumb_func
+Island_MasterEndDefeated:
+	bx pc
+	nop
+	.arm
+	ldr ip, [pc]
+	bx ip
+	.word JpMaster_EndDefeated
+	.thumb

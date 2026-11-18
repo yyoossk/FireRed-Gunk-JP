@@ -268,12 +268,15 @@ void ZeroEnemyPartyMons(void);
 extern const struct BattleMove gBattleMoves[];
 
 // JP port: replaces the BL to CreateNPCTrainerParty in the battle setup
+u8 JpMaster_CreateParty(struct Pokemon *party, u16 trainerNum);
 u8 JpCreateNPCTrainerPartyWrapper(struct Pokemon *party, u16 trainerNum)
 {
     const struct JpRematchMon *p;
     u8 i, j, level;
     u32 personality;
 
+    if ((i = JpMaster_CreateParty(party, trainerNum)) != 0)
+        return i;
     if (trainerNum < JP_FIRST_REMATCH_TRAINER || trainerNum >= JP_FIRST_REMATCH_TRAINER + NUM_REMATCH_LEADERS
      || !(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
         return JpCreateNPCTrainerParty(party, trainerNum);
