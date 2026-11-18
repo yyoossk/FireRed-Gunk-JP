@@ -1,25 +1,28 @@
 STATE
-MON 0 7 33 0 0 0 20
-COUNT 1
+BAG key 0 364 1
 BAG tm 0 341 1
-SEED 2468ACE0
-hold R 48
-run 20
-hold R 64
-run 30
-hold D 2
+MON 0 129 150 0 0 0 20
+COUNT 1
 run 10
+tap START
+run 30
+tap D
+run 5
 tap A
-run 60
+run 90
+tap R
+run 10
+tap R
+run 30
+tap A
+run 20
 SHOT a
 tap A
-run 60
+run 120
 SHOT b
 tap A
-run 60
-tap A
-run 60
-tap A
-run 200
-LOG
+run 20
 SHOT c
+tap A
+run 120
+SHOT d

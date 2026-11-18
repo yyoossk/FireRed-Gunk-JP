@@ -304,5 +304,9 @@ print('table refs repointed',cnt)
 # immediates CURSOR_OPTION_FIELD_MOVES 18 -> 20
 for at,old_hw,new_hw in [(0x08122652,0x2811,0x2814),(0x08122862,0x2E11,0x2E14),(0x081228C8,0x3812,0x3815),(0x08124E70,0x3812,0x3815)]:
     cur=struct.unpack_from('<H',rom,at-0x08000000)[0]; assert cur==old_hw,(hex(at),hex(cur)); struct.pack_into('<H',rom,at-0x08000000,new_hw)
+# 赤フルカラー: every Pokémon can learn all HMs (TMHM learnset word1 bits 18-25)
+_tm=0x0820ADE8-0x08000000
+for sp in range(1,412):
+    o=_tm+8*sp+4; struct.pack_into('<I',rom,o,struct.unpack_from('<I',rom,o)[0]|0x03FC0000)
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)
