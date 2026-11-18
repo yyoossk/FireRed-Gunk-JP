@@ -39,7 +39,9 @@ HOOKS={'event_object_movement.o':['GetObjectEventGraphicsInfo','TrySetupObjectEv
  'pokemon.o':['GetMoveRelearnerMoves','GetNumberOfRelearnableMoves'],
  'item.o':['SetBagPocketsPointers','ApplyNewEncryptionKeyToBagItems','ClearBag'],
  'item_menu.o':['ResetBagCursorPositions','All_CalculateNItemsAndMaxShowed','CalculateInitialCursorPosAndItemsAbove','UpdatePocketScrollPositions','PrintBagPocketName','ProcessPocketSwitchInput','SwitchPockets','Task_AnimateSwitchPockets','CreatePocketSwitchArrowPair','BackUpPlayerBag','RestorePlayerBag'],
- 'item_menu_icons.o':['SetBagVisualPocketId']}
+ 'item_menu_icons.o':['SetBagVisualPocketId'],
+ 'region_map.o':['GetMapName'],
+ 'battle_tower.o':['BattleTowerMapScript2','ChooseNextBattleTowerTrainer','GetBattleTowerTrainerFrontSpriteId','GetBattleTowerTrainerClassNameId','GetBattleTowerTrainerName','CheckPartyBattleTowerBanlist','PrintBattleTowerTrainerGreeting','StartSpecialBattle','SetBattleTowerProperty','BattleTowerUtil','SetBattleTowerParty','SaveBattleTowerProgress','DetermineBattleTowerPrize','GiveBattleTowerPrize','AwardBattleTowerRibbons']}
 def tramp(at,target):
     code=b''
     if at%4: code+=struct.pack('<H',0x46C0)       # nop to align
@@ -281,6 +283,8 @@ for at in range(0x08000000,0x08300000,4):
     if w in (OLDTR,OLDTR+4,OLDTR+0xA): w8(at,struct.pack('<I',NEWTR+(w-OLDTR)))
 assert rd(0x0800F8B8,4)==bl_bytes(0x0800F8B8,0x08010B0C); bl(0x0800F8B8,newsym['Island_TrainerParty'])
 master_apply()
+exec(open('/home/claude/tools/bt_patch.py').read())
+bt_apply()
 # --- reusable TMs (Gunk #7): JP Task_LearnedMove keeps the TM
 patch16(0x08126516,0xD803,0xE003)
 # 3. party menu: new cursor option table with WALK/RETURN before the field moves

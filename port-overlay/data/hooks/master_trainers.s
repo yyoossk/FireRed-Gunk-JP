@@ -44,11 +44,11 @@
 	.align 2
 	.include "data/hooks/master_gen.inc"
 
-@ Master Trainer overworld graphics infos (gfx 160-169), filled in by tools/patch_port.py
+@ new overworld graphics infos: gfx 160-169 Master Trainers, 170 Scott, 171 Sudowoodo (filled in by tools/patch_port.py)
 	.global gJpMasterGfxPtrs
 	.align 2
 gJpMasterGfxPtrs:
-	.fill 10, 4, 0
+	.fill 12, 4, 0
 
 JpMaster_EventScript_Pre::
 	lock

@@ -100,7 +100,7 @@ static u8 LoadGunkFollowerPalette(void)
 
 // FRLG+ Master Trainer overworld sprites (gfx 160-169); filled in by tools/patch_port.py
 #define JP_MASTER_GFX_FIRST 160
-extern const struct ObjectEventGraphicsInfo *const gJpMasterGfxPtrs[10];   // data/hooks/master_trainers.s
+extern const struct ObjectEventGraphicsInfo *const gJpMasterGfxPtrs[12];   // data/hooks/master_trainers.s
 void JpMaster_AdjustSpawn(struct ObjectEvent *objectEvent, const struct ObjectEventTemplate *template, struct SpriteTemplate *spriteTemplate);
 
 const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u8 graphicsId)
@@ -111,7 +111,7 @@ const struct ObjectEventGraphicsInfo *GetObjectEventGraphicsInfo(u8 graphicsId)
     if (graphicsId == OBJ_EVENT_GFX_GUNK_FOLLOWER && sGunkFollowerGfxInfo.images != NULL)
         return &sGunkFollowerGfxInfo;
 
-    if (graphicsId >= JP_MASTER_GFX_FIRST && graphicsId < JP_MASTER_GFX_FIRST + 10)
+    if (graphicsId >= JP_MASTER_GFX_FIRST && graphicsId < JP_MASTER_GFX_FIRST + 12)
         return gJpMasterGfxPtrs[graphicsId - JP_MASTER_GFX_FIRST];
 
     if (graphicsId >= NUM_OBJ_EVENT_GFX)
