@@ -314,5 +314,26 @@ for _o in range(0,len(rom)-4,4):
     if struct.unpack_from('<I',rom,_o)[0]==0x0818351A and rom[_o-0x10]==3:   # object template (localId 3) script field
         struct.pack_into('<I',rom,_o,newsym['JpEventScript_CeladonTMClerk']); _n+=1
 print('celadon TM clerk refs',_n); assert _n>=1
+# vanilla bug (FRLG+ fix list): Nugget Bridge Rocket gave unlimited Nuggets if you lost to him -> set the scene var before the battle
+_a=0x08178F29; _old=rd(_a,28)
+assert _old==bytes.fromhex('160f8001005c03640100006a9017080f007a9017080904166b400100'),_old.hex()
+w8(_a,_old[23:28]+_old[:23])
+# vanilla bug (pret BUGFIX): Cmd_getexp re-read Speed instead of Sp. Def for the 2nd double-battle slot after a level up
+patch16(0x0802197E,0x213D,0x213F); patch16(0x08021984,0x80E0,0x8160)
+# vanilla bug (pret BUGFIX): Pokédex area search read the fishing table with the land table size (12 instead of 10)
+patch16(0x0813D298,0x220C,0x220A)
+# FRLG+ vanilla fix: moves that never check accuracy show --- instead of 100
+for _mv in [274,335,293,268,176,266,288,270,286,275,277,212,262,102,300,171,220,278,287,272,285,303,289,135,169,294,233,346,273,281]:
+    assert rom[0x00208E24+12*_mv+3]==100; rom[0x00208E24+12*_mv+3]=0
+# FRLG+ vanilla fixes (AI scripts): Foresight checks the target, semi-invulnerable weather checks not swapped, Facade checks the user
+for _a,_o,_n in [(0x081BEF1C,1,0),(0x081BEF24,3,2),(0x081BEF2C,1,0),(0x081BF20F,3,2),(0x081BF215,2,3),(0x081BF2A9,0,1)]:
+    assert rom[_a-0x08000000]==_o,hex(_a); rom[_a-0x08000000]=_n
+# FRLG+ vanilla fix: Icefall Cave thin/cracked ice (metatiles 0x359/0x35A) no longer start wild encounters
+for _m in (0x359,0x35A):
+    _o=0x0027BD64+4*(_m-0x280); assert struct.unpack_from('<I',rom,_o)[0] in (0x1000026,0x1000027)
+    struct.pack_into('<I',rom,_o,struct.unpack_from('<I',rom,_o)[0]&~0x07000000)
+# FRLG+ vanilla fix: evolution move-learning glitch (A+B on the same frame at "make room for ..." gave a black screen):
+# the B check now only fires when A was not pressed this frame
+patch16(0x080D03DA,0x2002,0x2003); patch16(0x080D03DE,0x2800,0x2802); patch16(0x080D03E0,0xD100,0xD000)
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)
