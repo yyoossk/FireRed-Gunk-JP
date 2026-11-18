@@ -261,7 +261,7 @@ for idx,(g,n,lid) in enumerate([(6,2,1),(7,5,3),(9,6,1),(10,16,7),(11,3,7),(14,3
         if typ==3: trans=ptr
         else: entries.append((typ,ptr))
         t+=5
-    scr=bytes([0x16,0x04,0x80,idx,0x00,0x23])+struct.pack('<I',newsym['JpBH_HideLeaderIfAway'])
+    scr=bytes([0x16,0x04,0x80,idx,0x00,0x23])+struct.pack('<I',newsym['JpBH_HideLeaderIfAway']|1)
     if trans: scr+=bytes([0x04])+struct.pack('<I',trans)
     scr+=bytes([0x02])
     sa=alloc(scr,1)
