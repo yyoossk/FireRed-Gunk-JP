@@ -208,8 +208,11 @@ def alloc(data,align=4):
 def u32at(a): return struct.unpack_from('<I',rom,a-0x08000000)[0]
 MAPGROUPS=0x08311F70
 def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
-# --- 「これまでの あらすじ」を出さない (TryStartQuestLogPlayback: always continue directly)
-assert rd(0x08111AA6,2)==bytes.fromhex('0fd0'); w8(0x08111AA6,bytes.fromhex('0fe0'))
+# --- 「これまでの あらすじ」: 「せってい」で みる／みない (default みない)
+assert rd(0x08111A64,4)==bytes.fromhex('f0b50006'); tramp(0x08111A64,newsym['JpTryStartQuestLogPlayback'])
+# 「せってい」を作り直し（「これまでの あらすじ」みる／みない を追加）
+assert rd(0x08087EFC,2)==bytes.fromhex('70b5')
+tramp(0x08087EFC,newsym['JpCB2_OptionsMenuFromStartMenu'])
 # --- メニューから パソコン (start menu item 9)
 tramp(0x0806E51C,newsym['JpSetUpStartMenu_NormalField'])
 assert rd(0x0806EB00,4)==bytes.fromhex('00b50848'); tramp(0x0806EB00,newsym['JpStartMenu_FadeScreenIfLeavingOverworld'])

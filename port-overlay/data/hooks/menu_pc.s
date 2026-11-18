@@ -44,3 +44,6 @@ gJpText_MenuPC::
 gJpStartMenuDesc_PC::
 	.string "ポケモンを　あずけたり　ひきだしたり\n"
 	.string "どこでも　パソコンを　つかえる$"
+
+gJpText_OptionQuestLog::
+	.string "これまでの　あらすじ$"
