@@ -189,6 +189,95 @@ for it in [179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192,
 # --- FRLG+ event tickets: the diploma gives the しんぴのチケット (after the National Pokédex)
 assert rd(0x081845CF,6)==bytes.fromhex('250801276c02')
 w8(0x081845CF,bytes([0x05])+struct.pack('<I',newsym['EventScript_JpDiploma'])+bytes([0x02]))
+# --- FRLG+ Gym Leader rematches at the Seven Island house (hk_battle_house.c, battle_house.s)
+ALLOC=[0x08B80000]
+def alloc(data,align=4):
+    a=(ALLOC[0]+align-1)&~(align-1); assert all(x==0xFF for x in rom[a-0x08000000:a-0x08000000+len(data)]); w8(a,bytes(data)); ALLOC[0]=a+len(data); return a
+def u32at(a): return struct.unpack_from('<I',rom,a-0x08000000)[0]
+MAPGROUPS=0x08311F70
+def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
+def objtmpl(lid,gfx,x,y,elev,mt,rx,ry,script,flag):
+    return struct.pack('<BBBxhhBBBxHHIHxx',lid,gfx,0,x,y,elev,mt,rx|(ry<<4),0,0,script,flag)
+def bgev(x,y,kind,script): return struct.pack('<hhBBxxI',x,y,0,kind,script)
+FRLGP='/home/claude/frlgplus/data/layouts/SevenIsland_House_Room2/'
+# the basement: FRLG+'s layout (healing machine, mat, paintings) on the Pokémon Center tileset
+h=mapheader(31,1); lay=u32at(h)
+pc_secondary=u32at(u32at(mapheader(5,4))+20)
+assert struct.unpack_from('<ii',rom,lay-0x08000000)==(12,9)
+w8(lay+8,struct.pack('<I',alloc(open(FRLGP+'border.bin','rb').read())))
+w8(lay+12,struct.pack('<I',alloc(open(FRLGP+'map.bin','rb').read())))
+w8(lay+20,struct.pack('<I',newsym['gJpTileset_BattleHouse']))
+# FRLG+'s basement metatiles live in gTileset_Building's unused slots 0x186-0x1A2
+FB='/home/claude/frlgplus/data/tilesets/primary/building/'
+fm=open(FB+'metatiles.bin','rb').read(); fa=open(FB+'metatile_attributes.bin','rb').read()
+BMT=0x0826D07C; BATTR=0x0826F87C
+assert rom[BMT-0x08000000+0x186*16:BMT-0x08000000+0x1A3*16]==open('/home/claude/pret/data/tilesets/primary/building/metatiles.bin','rb').read()[0x186*16:0x1A3*16]
+w8(BMT+0x186*16,fm[0x186*16:0x1A3*16]); w8(BATTR+0x186*4,fa[0x186*4:0x1A3*4])
+ev=u32at(h+4); warps=u32at(ev+8)
+objs=b''.join([
+    objtmpl(1,80,0,6,0,0x0A,0,0,newsym['JpRoom2_EventScript_Leader0'],1),
+    objtmpl(2,81,5,2,3,0x16,0,0,newsym['JpRoom2_EventScript_Leader1'],2),
+    objtmpl(3,82,8,4,3,0x40,0,0,newsym['JpRoom2_EventScript_Leader2'],3),
+    objtmpl(4,83,1,2,3,0x07,0,0,newsym['JpRoom2_EventScript_Leader3'],4),
+    objtmpl(5,84,7,8,3,0x0A,0,0,newsym['JpRoom2_EventScript_Leader4'],5),
+    objtmpl(6,85,3,7,3,0x01,0,0,newsym['JpRoom2_EventScript_Leader5'],6),
+    objtmpl(7,86,10,6,3,0x01,0,0,newsym['JpRoom2_EventScript_Leader6'],7)])
+coords=struct.pack('<hhBxHHxxI',4,5,0,0x4000,0,newsym['JpRoom2_EventScript_Trigger'])
+bgs=b''.join([bgev(1,1,0,newsym['JpRoom2_EventScript_LeftPainting']),bgev(4,1,0,newsym['JpRoom2_EventScript_MiddlePainting']),
+    bgev(5,1,0,newsym['JpRoom2_EventScript_MiddlePainting']),bgev(10,1,0,newsym['JpRoom2_EventScript_RightPainting']),
+    bgev(11,2,3,newsym['JpRoom2_EventScript_HealingMachine'])])
+newev=struct.pack('<BBBBIIII',7,rom[ev-0x08000000+1],1,5,alloc(objs),warps,alloc(coords),alloc(bgs))
+w8(h+4,struct.pack('<I',alloc(newev)))
+w8(h+8,struct.pack('<I',newsym['JpRoom2_MapScripts']))
+# upstairs: the old woman's new script and her SPEAROW
+h=mapheader(31,0); ev=u32at(h+4)
+oldwoman=bytearray(rom[u32at(ev+4)-0x08000000:u32at(ev+4)-0x08000000+24])
+struct.pack_into('<I',oldwoman,16,newsym['JpRoom1_EventScript_OldWoman'])
+objs=bytes(oldwoman)+objtmpl(2,110,9,6,3,0x01,2,2,newsym['JpRoom1_EventScript_Spearow'],1)
+cnt=list(rom[ev-0x08000000:ev-0x08000000+4]); cnt[0]=2
+newev=bytes(cnt)+struct.pack('<IIII',alloc(objs),u32at(ev+8),u32at(ev+12),u32at(ev+16))
+w8(h+4,struct.pack('<I',alloc(newev)))
+w8(h+8,struct.pack('<I',newsym['JpRoom1_MapScripts']))
+# Seven Island: the mailbox
+h=mapheader(3,17); ev=u32at(h+4)
+cnt=list(rom[ev-0x08000000:ev-0x08000000+4]); nb=cnt[3]
+oldbg=rom[u32at(ev+16)-0x08000000:u32at(ev+16)-0x08000000+12*nb]
+cnt[3]=nb+1
+newev=bytes(cnt)+struct.pack('<IIII',u32at(ev+4),u32at(ev+8),u32at(ev+12),alloc(bytes(oldbg)+bgev(10,9,0,newsym['JpSevenIsland_EventScript_Mailbox'])))
+w8(h+4,struct.pack('<I',alloc(newev)))
+# the Gyms: a Leader visiting Seven Island is away (FLAG_TEMP_1F on the Leader's object)
+for idx,(g,n,lid) in enumerate([(6,2,1),(7,5,3),(9,6,1),(10,16,7),(11,3,7),(14,3,7),(12,0,8)]):
+    h=mapheader(g,n); ev=u32at(h+4); ob=u32at(ev+4)+24*(lid-1)
+    assert rom[ob-0x08000000]==lid and rom[ob-0x08000000+1] in range(80,87), (g,n,lid,rom[ob-0x08000000+1])
+    assert struct.unpack_from('<H',rom,ob-0x08000000+20)[0]==0
+    w8(ob+20,struct.pack('<H',0x1F))
+    tbl=u32at(h+8); entries=[]; t=tbl; trans=None
+    while rom[t-0x08000000]!=0:
+        typ=rom[t-0x08000000]; ptr=u32at(t+1)
+        if typ==3: trans=ptr
+        else: entries.append((typ,ptr))
+        t+=5
+    scr=bytes([0x16,0x04,0x80,idx,0x00,0x23])+struct.pack('<I',newsym['JpBH_HideLeaderIfAway'])
+    if trans: scr+=bytes([0x04])+struct.pack('<I',trans)
+    scr+=bytes([0x02])
+    sa=alloc(scr,1)
+    newtbl=bytes([3])+struct.pack('<I',sa)+b''.join(bytes([ty])+struct.pack('<I',p) for ty,p in entries)+bytes([0])
+    w8(h+8,struct.pack('<I',alloc(newtbl,1)))
+# gTrainers: relocated with the seven rematch Leaders as 743-749
+OLDTR=0x081F97F0
+tr=bytearray(rom[OLDTR-0x08000000:OLDTR-0x08000000+743*32])
+for k,src in enumerate([414,415,416,417,418,420,419]):
+    e=bytearray(rom[OLDTR-0x08000000+32*src:OLDTR-0x08000000+32*src+32])
+    e[0]=3
+    struct.pack_into('<HHHH',e,0x0A,19,19,0,0)
+    e[0x18]=6
+    struct.pack_into('<I',e,0x1C,newsym['gJpRematchVanillaParties']+k*6*16)
+    tr+=e
+NEWTR=alloc(tr)
+for at in range(0x08000000,0x08300000,4):
+    w=u32at(at)
+    if w in (OLDTR,OLDTR+4,OLDTR+0xA): w8(at,struct.pack('<I',NEWTR+(w-OLDTR)))
+assert rd(0x0800F8B8,4)==bl_bytes(0x0800F8B8,0x08010B0C); bl(0x0800F8B8,newsym['Island_TrainerParty'])
 # --- reusable TMs (Gunk #7): JP Task_LearnedMove keeps the TM
 patch16(0x08126516,0xD803,0xE003)
 # 3. party menu: new cursor option table with WALK/RETURN before the field moves

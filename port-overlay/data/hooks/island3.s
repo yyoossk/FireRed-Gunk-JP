@@ -71,3 +71,14 @@ Island_OpenContextMenu:
 	bx ip
 	.word JpOpenContextMenuWrapper
 	.thumb
+	.align 2
+	.global Island_TrainerParty
+	.thumb_func
+Island_TrainerParty:
+	bx pc
+	nop
+	.arm
+	ldr ip, [pc]
+	bx ip
+	.word JpCreateNPCTrainerPartyWrapper
+	.thumb

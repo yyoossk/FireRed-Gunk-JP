@@ -10,7 +10,7 @@ def mon(species=4,level=5,nick='ヒトカゲ',pid=0,otid=0x12345678,moves=(10,45
     n=level; exp=max(0,int(6*n**3/5-15*n*n+100*n-140)) if n>1 else 0
     if egg: friendship=0
     G=struct.pack('<HHIBBH',species,0,exp,0,friendship,0)
-    A=struct.pack('<4H4B',*moves,35,40,0,0)
+    A=struct.pack('<4H4B',*moves,*[(20 if m else 0) for m in moves])
     E=bytes([252,252,6,0,0,0])+bytes(6)
     ivs=(31|31<<5|31<<10|31<<15|31<<20|31<<25)
     if egg: ivs|=1<<30; friendship=0
@@ -23,8 +23,9 @@ def mon(species=4,level=5,nick='ヒトカゲ',pid=0,otid=0x12345678,moves=(10,45
     enc=b''.join(struct.pack('<I',struct.unpack_from('<I',dec,i)[0]^key) for i in range(0,48,4))
     box=struct.pack('<II',pid,otid)+nb+bytes([1,0x06 if egg else 0x02])+ot+bytes([0])+struct.pack('<HH',ck,0)+enc
     assert len(box)==80
-    hp=20
-    party=box+struct.pack('<IBBHH5H',0,level,0xFF,hp,hp,11,10,12,11,10)
+    hp=20 if level<50 else 999
+    st=(11,10,12,11,10) if level<50 else (999,999,999,999,999)
+    party=box+struct.pack('<IBBHH5H',0,level,0xFF,hp,hp,*st)
     assert len(party)==100
     return party
 if __name__=='__main__':
