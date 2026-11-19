@@ -132,3 +132,12 @@ Island_CallR3c:
 Island_CallR4:
 	bx r4
 	.pool
+
+	.section .island,"ax"
+	.align 2
+	.global Island_OnFrameGear
+	.thumb_func
+Island_OnFrameGear:       @ ProcessPlayerFieldInput: TryRunOnFrameMapScript + bike gear (B)
+	ldr r3, =JpOnFrameScriptAndBikeGear
+	bx r3
+	.pool

@@ -210,6 +210,23 @@ MAPGROUPS=0x08311F70
 def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
 # --- 「これまでの あらすじ」を出さない (TryStartQuestLogPlayback: always continue directly)
 assert rd(0x08111AA6,2)==bytes.fromhex('0fd0'); w8(0x08111AA6,bytes.fromhex('0fe0'))
+# --- 赤フルカラーの機能
+# 自転車の ギア (FRLG+): ProcessPlayerFieldInput の bl TryRunOnFrameMapScript -> B で ギアを きりかえ
+assert rd(0x0806C28E,4)==bytes.fromhex('fdf725f9'); bl(0x0806C28E,newsym['Island_OnFrameGear'])
+# つりざお: かならず かかる (Fishing6: Random() & 1 -> & 0)
+assert rd(0x0805CDB2,2)==bytes.fromhex('0121'); w8(0x0805CDB2,bytes.fromhex('0021'))
+# セキエイこうげんの ショップで マスターボール (10000円)
+assert rd(0x08189769,5)==bytes.fromhex('8678971808'), rd(0x08189753,30).hex(); w8(0x08189769,b'\x04'+struct.pack('<I',newsym['EventScript_JpIndigoMart']))
+assert r32(0x0839BEB8+40+12)==0; w8(0x0839BEB8+40+12,struct.pack('<H',10000))
+# ショップの 一覧の ねだんを 5けたに (マスターボール 10000円)
+assert rd(0x0809ADBC,2)==bytes.fromhex('0423'); w8(0x0809ADBC,bytes.fromhex('0523'))
+assert rd(0x0809ADE2,2)==bytes.fromhex('6023'); w8(0x0809ADE2,bytes.fromhex('5a23'))
+# そだてや: いまの レベル
+assert rd(0x08191434,9)==bytes.fromhex('0f003f581a08090403'); w8(0x08191434,b'\x05'+struct.pack('<I',newsym['EventScript_JpDaycareGrownFourIsland'])+bytes(4))
+assert rd(0x081A54E4,9)==bytes.fromhex('0f0033c61808090403'); w8(0x081A54E4,b'\x05'+struct.pack('<I',newsym['EventScript_JpDaycareGrownRoute5'])+bytes(4))
+assert rd(0x081A54ED,9)==bytes.fromhex('0f0086c51808090403'); w8(0x081A54ED,b'\x05'+struct.pack('<I',newsym['EventScript_JpDaycareNotYetRoute5'])+bytes(4))
+# 殿堂入りで 伝説の ポケモンが もどる
+assert rd(0x0816A473,5)==bytes.fromhex('04a4391908'); w8(0x0816A473,b'\x04'+struct.pack('<I',newsym['EventScript_JpHoFFlags']))
 # --- メニューから パソコン (start menu item 9)
 tramp(0x0806E51C,newsym['JpSetUpStartMenu_NormalField'])
 assert rd(0x0806EB00,4)==bytes.fromhex('00b50848'); tramp(0x0806EB00,newsym['JpStartMenu_FadeScreenIfLeavingOverworld'])
