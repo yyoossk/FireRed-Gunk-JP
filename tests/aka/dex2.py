@@ -1,0 +1,10 @@
+import sys; sys.path.insert(0,'/home/claude/tools')
+from walker import *
+g=Game('jp','/tmp/walkst/s21_postgame_jp.ss',rom=sys.argv[1]); g.run(10)
+g.tap('S'); g.run(20); g.tap('A'); g.run(120); g.tap('A'); g.run(80); g.tap('A'); g.run(90); g.shot('/tmp/t2/dd0.png')
+g.tap('s'); g.run(30); g.shot('/tmp/t2/dd1.png')
+g.tap('s'); g.run(30); g.shot('/tmp/t2/dd2.png')
+g.tap('s'); g.run(30); g.tap('D'); g.run(90); g.tap('s'); g.run(30); g.shot('/tmp/t2/dd3.png')
+g.tap('B'); g.run(60); g.close(); sys.exit()
+g.tap('s'); g.run(30); g.shot('/tmp/t2/dd4.png')
+g.close()

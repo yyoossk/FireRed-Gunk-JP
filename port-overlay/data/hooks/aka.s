@@ -88,3 +88,55 @@ Text_JpBoxSaved:
 
 gJpText_SafariHud::
 	.string "あと　{STR_VAR_1}ほ　ボール　{STR_VAR_2}こ$"
+
+@ バトルの わざの じょうほう (hk_battle_info.c)
+gJpText_BtlPower::
+	.string "いりょく$"
+gJpText_BtlAccuracy::
+	.string "めいちゅう$"
+gJpText_BtlFoe::
+	.string "あいて$"
+gJpText_BtlHp::
+	.string "HP$"
+gJpText_BtlNoValue::
+	.string "ーー$"
+gJpText_BtlNone::
+	.string "$"
+gJpText_BtlSmallFont::
+	.string "{FONT_SMALL}$"
+JpText_BtlX0:
+	.string "×0$"
+JpText_BtlX14:
+	.string "×1/4$"
+JpText_BtlX12:
+	.string "×1/2$"
+JpText_BtlX1:
+	.string "×1$"
+JpText_BtlX2:
+	.string "×2$"
+JpText_BtlX4:
+	.string "×4$"
+	.align 2
+gJpText_BtlEffect::
+	.4byte JpText_BtlX0, JpText_BtlX14, JpText_BtlX12, JpText_BtlX1, JpText_BtlX2, JpText_BtlX4
+
+@ ずかんの 種族値と しんか (hk_dex_stats.c)
+	.align 2
+gJpText_DexStats1::
+	.string "HP{STR_VAR_1}　こうげき{STR_VAR_2}　ぼうぎょ{STR_VAR_3}$"
+gJpText_DexStats2::
+	.string "とくこう{STR_VAR_1}　とくぼう{STR_VAR_2}　すばやさ{STR_VAR_3}$"
+gJpText_DexStats3::
+	.string "ごうけい{STR_VAR_1}　しんか　$"
+gJpText_DexEvoNone::
+	.string "なし$"
+gJpText_DexEvoLv::
+	.string "レベル$"
+gJpText_DexEvoTrade::
+	.string "つうしんこうかん$"
+gJpText_DexEvoFriend::
+	.string "なつき$"
+gJpText_DexEvoSep::
+	.string "/$"
+gJpText_DexEvoMore::
+	.string "　など$"

@@ -161,3 +161,35 @@ Island_PartyYesNoDefaultNo:  @ PartyMenuDisplayYesNoMenu with the cursor on „ÅÑ„
 1:	ldr r4, =0x08110A99
 	bx r4
 	.pool
+
+	.section .island,"ax"
+	.align 2
+	.global Island_ChooseMoveInput
+	.thumb_func
+Island_ChooseMoveInput:   @ HandleInputChooseMove: PreviewDeterminativeMoveTargets + START (move info page)
+	push {r4, lr}
+	ldr r4, =0x080331A9
+	bl 2f
+	ldr r4, =JpChooseMoveCheckR
+	bl 2f
+	pop {r4}
+	pop {r0}
+	bx r0
+2:	bx r4
+	.pool
+
+	.section .island,"ax"
+	.align 2
+	.global Island_DexMonPageInput
+	.thumb_func
+Island_DexMonPageInput:   @ Task_DexScreen_ShowMonPage state 5: SELECT = stats / evolution, then START = cry
+	push {r4, lr}
+	ldr r4, =JpDexMonPageInput
+	bl 3f
+	ldr r4, =0x08107691
+	bl 3f
+	pop {r4}
+	pop {r0}
+	bx r0
+3:	bx r4
+	.pool

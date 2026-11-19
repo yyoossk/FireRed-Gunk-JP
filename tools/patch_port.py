@@ -225,6 +225,11 @@ assert rd(0x08024E74,4)==bytes.fromhex('03484470'); w8(0x08024E74,bytes.fromhex(
 assert rd(0x080D02FA,2)==bytes.fromhex('0022'); w8(0x080D02FA,bytes.fromhex('0122'))
 assert rd(0x08126632,4)==bytes.fromhex('fcf779f8'); bl(0x08126632,newsym['Island_PartyYesNoDefaultNo'])
 assert rd(0x081269E6,4)==bytes.fromhex('fbf79ffe'); bl(0x081269E6,newsym['Island_PartyYesNoDefaultNo'])
+# バトル: わざの こうか・いりょく・めいちゅう、あいての HP (START で きりかえ)
+tramp(0x0803003C,newsym['JpMoveSelectionDisplayMoveType'])
+assert rd(0x0802E16E,4)==bytes.fromhex('05f01bf8'); bl(0x0802E16E,newsym['Island_ChooseMoveInput'])
+# ずかん: せつめいの ページで SELECT -> 種族値と しんか
+assert rd(0x081053AC,4)==bytes.fromhex('02f070f9'); bl(0x081053AC,newsym['Island_DexMonPageInput'])
 # そだてや: いまの レベル
 assert rd(0x08191434,9)==bytes.fromhex('0f003f581a08090403'); w8(0x08191434,b'\x05'+struct.pack('<I',newsym['EventScript_JpDaycareGrownFourIsland'])+bytes(4))
 assert rd(0x081A54E4,9)==bytes.fromhex('0f0033c61808090403'); w8(0x081A54E4,b'\x05'+struct.pack('<I',newsym['EventScript_JpDaycareGrownRoute5'])+bytes(4))
