@@ -211,6 +211,7 @@ def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
 # --- 「これまでの あらすじ」を出さない (TryStartQuestLogPlayback: always continue directly)
 assert rd(0x08111AA6,2)==bytes.fromhex('0fd0'); w8(0x08111AA6,bytes.fromhex('0fe0'))
 # --- 赤フルカラーの機能
+_ew=[l for l in open(PORT+'/pb/port.map') if 'ewram_end = .' in l][0].split()[0]; assert int(_ew,16)<=0x02040000, 'EWRAM overflow '+_ew
 # island stubs live in the unused UnusedBlitBitmapRect (0x0812EEC0-0x0812F09C)
 _isl=[l for l in open(PORT+'/pb/port.map') if l.startswith('.island ')][0].split(); assert int(_isl[1],16)+int(_isl[2],16)<=0x0812F09C, 'island overflow'
 # つりざお: かならず かかる (Fishing6: Random() & 1 -> & 0)
@@ -227,7 +228,9 @@ assert rd(0x08024E74,4)==bytes.fromhex('03484470'); w8(0x08024E74,bytes.fromhex(
 assert rd(0x080D02FA,2)==bytes.fromhex('0022'); w8(0x080D02FA,bytes.fromhex('0122'))
 assert rd(0x08126632,4)==bytes.fromhex('fcf779f8'); bl(0x08126632,newsym['Island_PartyYesNoDefaultNo'])
 assert rd(0x081269E6,4)==bytes.fromhex('fbf79ffe'); bl(0x081269E6,newsym['Island_PartyYesNoDefaultNo'])
-# バトル: わざの こうか・いりょく・めいちゅう、あいての HP (START で きりかえ)
+# バトル: わざの こうか・いりょく・めいちゅう (START で きりかえ)
+# あいての HP も こちらと 同じく HPバーの 下に 数字 (sHealthbarSpriteTemplates[1].callback)
+assert r32(0x08218584+24+20)==0x0804761D; w8(0x08218584+24+20,struct.pack('<I',newsym['JpSpriteCB_FoeHealthBar']|1))
 tramp(0x0803003C,newsym['JpMoveSelectionDisplayMoveType'])
 assert rd(0x0802E16E,4)==bytes.fromhex('05f01bf8'); bl(0x0802E16E,newsym['Island_ChooseMoveInput'])
 # ずかん: せつめいの ページで SELECT -> 種族値と しんか

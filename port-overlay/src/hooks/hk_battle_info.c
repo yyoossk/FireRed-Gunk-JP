@@ -7,9 +7,9 @@
 #include "sound.h"
 #include "constants/songs.h"
 #include "constants/moves.h"
-// 赤フルカラー: バトルで わざの こうかと いりょく・めいちゅう、あいての HP。START で きりかえ (L・R は ヘルプ)
+// 赤フルカラー: バトルで わざの こうかと いりょく・めいちゅう。START で きりかえ (L・R は ヘルプ)
 // JP right box: window 7 "PP", 9 PP numbers, 8 "わざタイプ／" label (6 tiles), 10 type name (4 tiles).
-// Page 0: type (8) + effectiveness vs the opponent (10). Page 1: いりょく / めいちゅう. Page 2: あいての HP.
+// Page 0: type (8) + effectiveness vs the opponent (10). Page 1: いりょく / めいちゅう. (The opponent's HP numbers are on its healthbox: hk_foe_hp.c)
 
 #define JpTypeNames      ((const u8 (*)[5])0x0820788C)
 #define JpTypeEffectiveness ((const u8 *)0x0820773C)
@@ -83,7 +83,7 @@ void JpMoveSelectionDisplayMoveType(void)
     u8 *p;
 
     (void)p;
-    switch (sJpMoveInfoPage % 3)
+    switch (sJpMoveInfoPage % 2)
     {
     default:
         PutColored(JpTypeNames[gBattleMoves[move].type], 8);
@@ -109,24 +109,6 @@ void JpMoveSelectionDisplayMoveType(void)
             ConvertIntToDecimalStringN(buf, gBattleMoves[move].power, STR_CONV_MODE_RIGHT_ALIGN, 3);
         PutColored(buf, 10);
         break;
-    case 2:  // あいて HP / 45/120
-    {
-        u8 target = GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT);
-        u8 hp[24];
-        JpPpPaletteNormal(moveInfo);
-        StringCopy(gDisplayedStringBattle, gJpText_BtlFoe);
-        BattlePutTextOnWindow(gDisplayedStringBattle, 7);
-        StringCopy(gDisplayedStringBattle, gJpText_BtlHp);
-        BattlePutTextOnWindow(gDisplayedStringBattle, 9);
-        p = StringCopy(hp, gJpText_BtlSmallFont);
-        p = ConvertIntToDecimalStringN(p, gBattleMons[target].hp, STR_CONV_MODE_LEFT_ALIGN, 3);
-        *p++ = 0xBA;  // '/'
-        ConvertIntToDecimalStringN(p, gBattleMons[target].maxHP, STR_CONV_MODE_LEFT_ALIGN, 3);
-        PutColored(hp, 8);
-        StringCopy(gDisplayedStringBattle, gJpText_BtlNone);
-        BattlePutTextOnWindow(gDisplayedStringBattle, 10);
-        break;
-    }
     }
 }
 
@@ -139,7 +121,7 @@ void JpChooseMoveCheckR(void)
     if (JOY_NEW(START_BUTTON))
     {
         PlaySE(SE_SELECT);
-        sJpMoveInfoPage = (sJpMoveInfoPage + 1) % 3;
+        sJpMoveInfoPage = (sJpMoveInfoPage + 1) % 2;
         JpMoveSelectionDisplayPpString();
         if (sJpMoveInfoPage == 0)
             JpMoveSelectionDisplayPpNumber();
