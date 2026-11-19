@@ -30,7 +30,7 @@ index 876546ae5..a4e89af51 100644
  
  u8 *GetBoxNamePtr(u8 boxNumber);
 diff --git a/src/field_control_avatar.c b/src/field_control_avatar.c
-index 906d4a0e2..33f915fa7 100644
+index 906d4a0e2..517595cae 100644
 --- a/src/field_control_avatar.c
 +++ b/src/field_control_avatar.c
 @@ -1,4 +1,6 @@
@@ -40,7 +40,27 @@ index 906d4a0e2..33f915fa7 100644
  #include "gunk_follower.h"
  #include "gflib.h"
  #include "bike.h"
-@@ -222,6 +224,7 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
+@@ -192,6 +194,8 @@ static void QuestLogOverrideJoyVars(struct FieldInput *input, u16 *newKeys, u16
+     ClearQuestLogInput();
+ }
+ 
++bool8 JpFieldInputExtras(void);
++
+ int ProcessPlayerFieldInput(struct FieldInput *input)
+ {
+     struct MapPosition position;
+@@ -214,6 +218,10 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
+     if (TryRunOnFrameMapScript() == TRUE)
+         return TRUE;
+ 
++    // 赤フルカラー／FRLG+: 自転車の ギア (B)・ボックスの 自動きりかえ (JP port: hk_aka.c)
++    if (JpFieldInputExtras() == TRUE)
++        return TRUE;
++
+     if (input->tookStep)
+     {
+         IncrementGameStat(GAME_STAT_STEPS);
+@@ -222,6 +230,7 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
          RunMassageCooldownStepCounter();
          IncrementResortGorgeousStepCounter();
          IncrementBirthIslandRockStepCount();
@@ -48,7 +68,7 @@ index 906d4a0e2..33f915fa7 100644
          if (TryStartStepBasedScript(&position, metatileBehavior, playerDirection) == TRUE)
          {
              gFieldInputRecord.tookStep = TRUE;
-@@ -298,6 +301,16 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
+@@ -298,6 +307,16 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
      }
      if (input->pressedRButton && Gunk_UseSecondRegisteredItemOnField() == TRUE)
          return TRUE;

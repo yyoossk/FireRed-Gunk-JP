@@ -2,6 +2,7 @@
 #include "constants/flags.h"
 #include "constants/vars.h"
 #include "constants/items.h"
+#include "constants/songs.h"
 	.include "asm/macros.inc"
 	.include "asm/macros/event.inc"
 	.set FALSE, 0
@@ -57,3 +58,30 @@ EventScript_JpHoFFlags::
 	call 0x081939A4
 	callnative JpRespawnLegends
 	return
+
+@ ボックスの 自動きりかえ と レポート
+EventScript_JpBoxSwitched::
+	lockall
+	playse SE_PC_LOGIN
+	msgbox Text_JpBoxSwitched
+	message Text_JpBoxSaving
+	waitmessage
+	callnative JpAutoSaveGame
+	end
+
+EventScript_JpBoxSaved::
+	playse SE_SAVE
+	waitse
+	msgbox Text_JpBoxSaved
+	releaseall
+	end
+
+Text_JpBoxSwitched:
+	.string "{STR_VAR_1}が　いっぱいに　なったので\n"
+	.string "{STR_VAR_2}に　きりかえた！$"
+Text_JpBoxSaving:
+	.string "レポートを　かいています\n"
+	.string "でんげんを　きらないで　ください$"
+Text_JpBoxSaved:
+	.string "{PLAYER}は\n"
+	.string "レポートに　しっかり　かきのこした！$"

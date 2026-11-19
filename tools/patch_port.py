@@ -211,8 +211,6 @@ def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
 # --- 「これまでの あらすじ」を出さない (TryStartQuestLogPlayback: always continue directly)
 assert rd(0x08111AA6,2)==bytes.fromhex('0fd0'); w8(0x08111AA6,bytes.fromhex('0fe0'))
 # --- 赤フルカラーの機能
-# 自転車の ギア (FRLG+): ProcessPlayerFieldInput の bl TryRunOnFrameMapScript -> B で ギアを きりかえ
-assert rd(0x0806C28E,4)==bytes.fromhex('fdf725f9'); bl(0x0806C28E,newsym['Island_OnFrameGear'])
 # つりざお: かならず かかる (Fishing6: Random() & 1 -> & 0)
 assert rd(0x0805CDB2,2)==bytes.fromhex('0121'); w8(0x0805CDB2,bytes.fromhex('0021'))
 # セキエイこうげんの ショップで マスターボール (10000円)

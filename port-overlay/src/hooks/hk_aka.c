@@ -10,26 +10,81 @@
 #include "constants/region_map_sections.h"
 #include "constants/flags.h"
 #include "constants/species.h"
+#include "script.h"
+#include "task.h"
+#include "fieldmap.h"
+#include "quest_log.h"
+#include "constants/quest_log.h"
+#include "safari_zone.h"
+#include "save.h"
+#include "pokemon_storage_system.h"
+#include "constants/game_stat.h"
 // 赤フルカラーの機能を ファイアレッドに
 
 bool8 TryRunOnFrameMapScript(void);
+void SetCurrentBox(u8 boxId);
 #define FLAG_JP_BIKE_GEAR 0x0E3
+#define JP_BOXES 16
 
-// ProcessPlayerFieldInput: bl TryRunOnFrameMapScript -> here. FRLG+ bike gear: B on the bike switches gears
-bool8 JpOnFrameScriptAndBikeGear(void)
+extern const u8 EventScript_JpBoxSwitched[];
+
+static u8 CountMonsInJpBox(u8 box)
 {
-    if (TryRunOnFrameMapScript() == TRUE)
-        return TRUE;
-    if (JOY_NEW(B_BUTTON) && (gPlayerAvatar.flags & (PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE))
-     && GetCurrentRegionMapSectionId() != MAPSEC_ROUTE_17)
+    u8 i, n = 0;
+    for (i = 0; i < IN_BOX_COUNT; i++)
+        if (GetBoxMonDataAt(box, i, MON_DATA_SPECIES) != SPECIES_NONE)
+            n++;
+    return n;
+}
+
+// ボックスの 自動きりかえ (ルビー・サファイア風): いまの ボックスが いっぱいなら つぎの あいている ボックスへ。レポートも かく
+static bool8 TryJpBoxAutoSwitch(void)
+{
+    u8 cur, i, b;
+
+    if ((gMain.vblankCounter2 & 15) != 0 || !FlagGet(FLAG_SYS_POKEMON_GET) || GetSafariZoneFlag()
+     || QL_IS_PLAYBACK_STATE || ArePlayerFieldControlsLocked())
+        return FALSE;
+    cur = StorageGetCurrentBox();
+    if (cur >= JP_BOXES || CountMonsInJpBox(cur) < IN_BOX_COUNT)
+        return FALSE;
+    for (i = 1; i < JP_BOXES; i++)
     {
-        if (FlagGet(FLAG_JP_BIKE_GEAR))
-            FlagClear(FLAG_JP_BIKE_GEAR);
-        else
-            FlagSet(FLAG_JP_BIKE_GEAR);
-        PlaySE(SE_BIKE_BELL);
+        b = (cur + i) % JP_BOXES;
+        if (CountMonsInJpBox(b) < IN_BOX_COUNT)
+        {
+            StringCopy(gStringVar1, GetBoxNamePtr(cur));
+            StringCopy(gStringVar2, GetBoxNamePtr(b));
+            SetCurrentBox(b);
+            ScriptContext_SetupScript(EventScript_JpBoxSwitched);
+            return TRUE;
+        }
     }
     return FALSE;
+}
+
+// a full save stops a running script: the switch script ends first, then this task saves and starts the "saved" script
+extern const u8 EventScript_JpBoxSaved[];
+static void Task_JpAutoSave(u8 taskId)
+{
+    if (ScriptContext_IsEnabled())
+        return;
+    SaveMapView();
+    IncrementGameStat(GAME_STAT_SAVED_GAME);
+    TrySavingData(SAVE_NORMAL);
+    ScriptContext_SetupScript(EventScript_JpBoxSaved);
+    DestroyTask(taskId);
+}
+
+void JpAutoSaveGame(void)
+{
+    CreateTask(Task_JpAutoSave, 80);
+}
+
+// ProcessPlayerFieldInput (gunk/src/field_control_avatar.c) -> here (the bike gear toggle is already in Gunk's ProcessPlayerFieldInput)
+bool8 JpFieldInputExtras(void)
+{
+    return TryJpBoxAutoSwitch();
 }
 
 // そだてや: いまの レベル -> gStringVar3
