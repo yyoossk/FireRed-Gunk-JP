@@ -211,6 +211,8 @@ def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
 # --- 「これまでの あらすじ」を出さない (TryStartQuestLogPlayback: always continue directly)
 assert rd(0x08111AA6,2)==bytes.fromhex('0fd0'); w8(0x08111AA6,bytes.fromhex('0fe0'))
 # --- 赤フルカラーの機能
+# island stubs live in the unused UnusedBlitBitmapRect (0x0812EEC0-0x0812F09C)
+_isl=[l for l in open(PORT+'/pb/port.map') if l.startswith('.island ')][0].split(); assert int(_isl[1],16)+int(_isl[2],16)<=0x0812F09C, 'island overflow'
 # つりざお: かならず かかる (Fishing6: Random() & 1 -> & 0)
 assert rd(0x0805CDB2,2)==bytes.fromhex('0121'); w8(0x0805CDB2,bytes.fromhex('0021'))
 # セキエイこうげんの ショップで マスターボール (10000円)
