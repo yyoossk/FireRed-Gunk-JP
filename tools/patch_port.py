@@ -221,6 +221,12 @@ assert r32(0x0839BEB8+40+12)==0; w8(0x0839BEB8+40+12,struct.pack('<H',10000))
 # ショップの 一覧の ねだんを 5けたに (マスターボール 10000円)
 assert rd(0x0809ADBC,2)==bytes.fromhex('0423'); w8(0x0809ADBC,bytes.fromhex('0523'))
 assert rd(0x0809ADE2,2)==bytes.fromhex('6023'); w8(0x0809ADE2,bytes.fromhex('5a23'))
+# わざを おぼえるときの「はい／いいえ」は「いいえ」から (Aの れんだで わざを うわがきしない)
+assert rd(0x08024B44,4)==bytes.fromhex('04484470'); w8(0x08024B44,bytes.fromhex('04494870'))
+assert rd(0x08024E74,4)==bytes.fromhex('03484470'); w8(0x08024E74,bytes.fromhex('03494870'))
+assert rd(0x080D02FA,2)==bytes.fromhex('0022'); w8(0x080D02FA,bytes.fromhex('0122'))
+assert rd(0x08126632,4)==bytes.fromhex('fcf779f8'); bl(0x08126632,newsym['Island_PartyYesNoDefaultNo'])
+assert rd(0x081269E6,4)==bytes.fromhex('fbf79ffe'); bl(0x081269E6,newsym['Island_PartyYesNoDefaultNo'])
 # そだてや: いまの レベル
 assert rd(0x08191434,9)==bytes.fromhex('0f003f581a08090403'); w8(0x08191434,b'\x05'+struct.pack('<I',newsym['EventScript_JpDaycareGrownFourIsland'])+bytes(4))
 assert rd(0x081A54E4,9)==bytes.fromhex('0f0033c61808090403'); w8(0x081A54E4,b'\x05'+struct.pack('<I',newsym['EventScript_JpDaycareGrownRoute5'])+bytes(4))
@@ -336,18 +342,18 @@ patch16(0x08126516,0xD803,0xE003)
 a,old=jp('sCursorOptions','party_menu.o')
 NOPT_OLD=18+12
 tbl=bytes(rom[old-0x08000000:old-0x08000000+8*NOPT_OLD])
-new=tbl[:8*18]+struct.pack('<II',newsym['gText_GunkWalk'],newsym['CursorCB_GunkWalk']|1)+struct.pack('<II',newsym['gText_GunkReturn'],newsym['CursorCB_GunkReturn']|1)+struct.pack('<II',newsym['gText_JpForget'],newsym['CursorCB_JpForget']|1)+tbl[8*18:]
+new=tbl[:8*18]+struct.pack('<II',newsym['gText_GunkWalk'],newsym['CursorCB_GunkWalk']|1)+struct.pack('<II',newsym['gText_GunkReturn'],newsym['CursorCB_GunkReturn']|1)+struct.pack('<II',newsym['gText_JpForget'],newsym['CursorCB_JpForget']|1)+struct.pack('<II',newsym['gText_JpNickname'],newsym['CursorCB_JpNickname']|1)+tbl[8*18:]
 end=(end+3)&~3; newtbl=end; w8(newtbl,new); end+=len(new)
 # repoint references (literal pools in code region)
 cnt=0
 for off in range(0,0x01E0000,4):
     w=struct.unpack_from('<I',rom,off)[0]
     if old<=w<old+8*NOPT_OLD:
-        d=w-old; nd=d if d<8*18 else d+24
+        d=w-old; nd=d if d<8*18 else d+32
         struct.pack_into('<I',rom,off,newtbl+nd); cnt+=1; print('  repoint',hex(off+0x08000000),hex(w),'->',hex(newtbl+nd))
 print('table refs repointed',cnt)
-# immediates CURSOR_OPTION_FIELD_MOVES 18 -> 20
-for at,old_hw,new_hw in [(0x08122652,0x2811,0x2814),(0x08122862,0x2E11,0x2E14),(0x081228C8,0x3812,0x3815),(0x08124E70,0x3812,0x3815)]:
+# immediates CURSOR_OPTION_FIELD_MOVES 18 -> 22
+for at,old_hw,new_hw in [(0x08122652,0x2811,0x2815),(0x08122862,0x2E11,0x2E15),(0x081228C8,0x3812,0x3816),(0x08124E70,0x3812,0x3816)]:
     cur=struct.unpack_from('<H',rom,at-0x08000000)[0]; assert cur==old_hw,(hex(at),hex(cur)); struct.pack_into('<H',rom,at-0x08000000,new_hw)
 # 赤フルカラー: every Pokémon can learn all HMs (TMHM learnset word1 bits 18-25)
 _tm=0x0820ADE8-0x08000000

@@ -141,3 +141,29 @@ Island_OnFrameGear:       @ ProcessPlayerFieldInput: TryRunOnFrameMapScript + bi
 	ldr r3, =JpOnFrameScriptAndBikeGear
 	bx r3
 	.pool
+
+	.section .island,"ax"
+	.align 2
+	.global Island_PartyYesNoDefaultNo
+	.thumb_func
+Island_PartyYesNoDefaultNo:  @ PartyMenuDisplayYesNoMenu with the cursor on いいえ (learning a move)
+	push {r4, lr}
+	sub sp, #12
+	movs r1, #0x4F
+	str r1, [sp, #0]
+	movs r1, #13
+	str r1, [sp, #4]
+	movs r1, #1
+	str r1, [sp, #8]
+	ldr r0, =0x084151F0
+	movs r1, #2
+	movs r2, #2
+	movs r3, #2
+	bl 1f
+	add sp, #12
+	pop {r4}
+	pop {r0}
+	bx r0
+1:	ldr r4, =0x08110A99
+	bx r4
+	.pool
