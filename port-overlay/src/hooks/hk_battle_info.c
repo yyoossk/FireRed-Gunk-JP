@@ -57,6 +57,17 @@ static u8 GetJpEffectiveness(u16 move)
     }
 }
 
+#define JpSetPpNumbersPaletteInMoveSelection ((void (*)(void))0x080D9A01)
+// the PP line turns yellow/red when PP is low; the other pages use the normal colors
+static void JpPpPaletteNormal(struct ChooseMoveStruct *moveInfo)
+{
+    u8 c = gMoveSelectionCursor[gActiveBattler];
+    u8 pp = moveInfo->currentPp[c];
+    moveInfo->currentPp[c] = moveInfo->maxPp[c];
+    JpSetPpNumbersPaletteInMoveSelection();
+    moveInfo->currentPp[c] = pp;
+}
+
 static void PutColored(const u8 *text, u8 windowId)
 {
     u8 *p = StringCopy(gDisplayedStringBattle, JpDynamicColors);
@@ -82,6 +93,7 @@ void JpMoveSelectionDisplayMoveType(void)
             PutColored(gJpText_BtlEffect[GetJpEffectiveness(move)], 10);
         break;
     case 1:  // めいちゅう (PP line) / いりょく (type line)
+        JpPpPaletteNormal(moveInfo);
         StringCopy(gDisplayedStringBattle, gJpText_BtlAccuracy);
         BattlePutTextOnWindow(gDisplayedStringBattle, 7);
         if (gBattleMoves[move].accuracy == 0)
@@ -101,6 +113,7 @@ void JpMoveSelectionDisplayMoveType(void)
     {
         u8 target = GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT);
         u8 hp[24];
+        JpPpPaletteNormal(moveInfo);
         StringCopy(gDisplayedStringBattle, gJpText_BtlFoe);
         BattlePutTextOnWindow(gDisplayedStringBattle, 7);
         StringCopy(gDisplayedStringBattle, gJpText_BtlHp);
