@@ -428,6 +428,12 @@ assert u32at(0x080EFBAC)==0x083CDA44
 w8(0x080EFBAC,struct.pack('<I',alloc(bytes(rom[0x003CDA44:0x003CDA44+40])+bytes(8))))
 # FRLG+ vanilla tile-error fixes (tilesets + small layout fixes)
 exec(open('/home/claude/tools/tile_fix.py').read())
+# タイトル画面のリザードンをフルカラーに（絵は tools/title_charizard.py で作る）
+_T='/home/claude/port/data/title/'
+assert rd(0x080781B0,12)==struct.pack('<III',0x083809E8,0x08380A08,0x083812E4)
+w8(0x083809E8,open(_T+'charizard_pal.bin','rb').read())
+w8(0x080781B4,struct.pack('<I',alloc(open(_T+'charizard_tiles.lz','rb').read())))
+w8(0x080781B8,struct.pack('<I',alloc(open(_T+'charizard_map.lz','rb').read())))
 if os.environ.get('V151'): exec(open('/home/claude/tools/v151_patch.py').read())
 print('end of new data',hex(end))
 open(OUT,'wb').write(rom)
