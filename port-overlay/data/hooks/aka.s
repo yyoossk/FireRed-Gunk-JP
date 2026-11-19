@@ -85,3 +85,6 @@ Text_JpBoxSaving:
 Text_JpBoxSaved:
 	.string "{PLAYER}は\n"
 	.string "レポートに　しっかり　かきのこした！$"
+
+gJpText_SafariHud::
+	.string "あと　{STR_VAR_1}ほ　ボール　{STR_VAR_2}こ$"

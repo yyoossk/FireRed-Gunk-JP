@@ -12,6 +12,11 @@
 #include "constants/species.h"
 #include "script.h"
 #include "task.h"
+#include "menu.h"
+#include "new_menu_helpers.h"
+#include "text_window.h"
+#include "window.h"
+#include "text.h"
 #include "fieldmap.h"
 #include "quest_log.h"
 #include "constants/quest_log.h"
@@ -82,8 +87,64 @@ void JpAutoSaveGame(void)
 }
 
 // ProcessPlayerFieldInput (gunk/src/field_control_avatar.c) -> here (the bike gear toggle is already in Gunk's ProcessPlayerFieldInput)
+// サファリゾーン: のこりの ほすうと ボールを 画面の したに (あるいている あいだ)
+extern const u8 gJpText_SafariHud[];
+void CB2_Overworld(void);
+static const struct WindowTemplate sJpSafariHudWindow = {
+    .bg = 0, .tilemapLeft = 1, .tilemapTop = 17, .width = 20, .height = 2, .paletteNum = 15, .baseBlock = 0x040
+};
+
+static void JpSafariHudPrint(u8 windowId)
+{
+    ConvertIntToDecimalStringN(gStringVar1, gSafariZoneStepCounter, STR_CONV_MODE_LEFT_ALIGN, 3);
+    ConvertIntToDecimalStringN(gStringVar2, gNumSafariBalls, STR_CONV_MODE_LEFT_ALIGN, 2);
+    StringExpandPlaceholders(gStringVar4, gJpText_SafariHud);
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    AddTextPrinterParameterized(windowId, FONT_NORMAL, gStringVar4, 2, 1, TEXT_SKIP_DRAW, NULL);
+    CopyWindowToVram(windowId, COPYWIN_FULL);
+}
+
+static void Task_JpSafariHud(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+
+    if (!GetSafariZoneFlag() || ArePlayerFieldControlsLocked() || gMain.callback2 != CB2_Overworld)
+    {
+        ClearStdWindowAndFrameToTransparent(data[0], TRUE);
+        RemoveWindow(data[0]);
+        DestroyTask(taskId);
+        return;
+    }
+    if (data[1] != gSafariZoneStepCounter || data[2] != gNumSafariBalls)
+    {
+        data[1] = gSafariZoneStepCounter;
+        data[2] = gNumSafariBalls;
+        JpSafariHudPrint(data[0]);
+    }
+}
+
+static void TryShowJpSafariHud(void)
+{
+    u8 taskId, windowId;
+
+    if (!GetSafariZoneFlag() || FuncIsActiveTask(Task_JpSafariHud))
+        return;
+    windowId = AddWindow(&sJpSafariHudWindow);
+    if (windowId == WINDOW_NONE)
+        return;
+    taskId = CreateTask(Task_JpSafariHud, 80);
+    gTasks[taskId].data[0] = windowId;
+    gTasks[taskId].data[1] = gSafariZoneStepCounter;
+    gTasks[taskId].data[2] = gNumSafariBalls;
+    LoadStdWindowFrameGfx();
+    PutWindowTilemap(windowId);
+    DrawStdWindowFrame(windowId, FALSE);
+    JpSafariHudPrint(windowId);
+}
+
 bool8 JpFieldInputExtras(void)
 {
+    TryShowJpSafariHud();
     return TryJpBoxAutoSwitch();
 }
 
