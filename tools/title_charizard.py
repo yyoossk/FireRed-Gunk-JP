@@ -56,10 +56,8 @@ for (x,y),v in px.items():
     elif v==6: n=11 if WING[x,y] else 2                              # いちばん暗い所は こい色（黒い線にしない）
     elif CLAW[x,y] and v>=14: n=1
     elif HORN[x,y]: n=up(BODY[v],2)
-    elif LWING[x,y] and 48<=x<=58 and 24<=y<=36: n=4                    # 奥のつばさの まだら模様は ならす
-    elif LWING[x,y] and v<=9:
-        nb=[px.get((x+dx,y+dy),0) for dx,dy in ((1,0),(-1,0),(0,1),(0,-1))]
-        n=BODY[v] if any(q>=10 for q in nb) else up(BODY[v],2)   # 首との さかいめは 少し暗く
+    elif LWING[x,y] and v<=9: n=up(BODY[v],1)                         # 奥のつばさ（元の濃淡のまま少し明るく）
+    elif LWING[x,y] and 48<=x<=58 and 24<=y<=36 and v==10: n=up(BODY[9],1)   # まだら模様も濃淡のまま
     elif WING[x,y] and v in (7,8,9): n={7:11,8:12,9:13}[v]
     elif BELLY[x,y] and v>=12: n=10 if v>=13 else 9
     elif TAIL_UNDER[x,y] and v>=10: n=10 if v>=12 else 9               # しっぽの うら側（クリーム）
