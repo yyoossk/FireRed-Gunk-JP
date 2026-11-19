@@ -47,12 +47,7 @@ for (x,y),v in px.items():
     if v==0: new[x,y]=0; continue
     edge=any(px.get((x+dx,y+dy),0)==0 for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)))
     if v==1: v=6
-    if FLAME[x,y]:
-        f=(y-34)/28                                                   # 0＝口に近い根もと、1＝先
-        if edge: n=14
-        elif v>=14 or f<0.35: n=15
-        elif f<0.7: n=6
-        else: n=14
+    if FLAME[x,y]: n={11:14,12:14,13:6,14:8,15:15}.get(v,14)          # 炎：元の濃淡のまま（暗い所ほど赤、明るい所ほど黄）
     elif v==6: n=11 if WING[x,y] else 2                              # いちばん暗い所は こい色（黒い線にしない）
     elif CLAW[x,y] and v>=14: n=1
     elif HORN[x,y]: n=up(BODY[v],2)
