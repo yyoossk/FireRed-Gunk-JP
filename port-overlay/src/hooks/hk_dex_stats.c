@@ -67,8 +67,8 @@ extern const u8 gJpText_DexEvoFriend[];
 extern const u8 gJpText_DexEvoSep[];
 extern const u8 gJpText_DexEvoMore[];
 
-EWRAM_DATA static u8 sJpDexStatsShown = 0;
-EWRAM_DATA static u16 sJpDexStatsSpecies = 0;
+__attribute__((section("ewram_late"))) static u8 sJpDexStatsShown = 0;
+__attribute__((section("ewram_late"))) static u16 sJpDexStatsSpecies = 0;
 
 static u8 EvoCategory(u16 method)
 {

@@ -24,7 +24,7 @@ extern const u8 gJpText_BtlNone[];
 extern const u8 gJpText_BtlNoValue[];
 extern const u8 *const gJpText_BtlEffect[];
 
-EWRAM_DATA static u8 sJpMoveInfoPage = 0;
+__attribute__((section("ewram_late"))) static u8 sJpMoveInfoPage = 0;
 
 static u8 GetJpEffectiveness(u16 move)
 {
