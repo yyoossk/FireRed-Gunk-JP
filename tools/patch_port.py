@@ -257,6 +257,9 @@ assert rd(0x0817F43E,11)==bytes.fromhex('166c400100292e002a9200')
 w8(0x0817F43E,b'\x04'+struct.pack('<I',newsym['EventScript_JpBrockScene'])+bytes(6))
 _ev=u32at(mapheader(4,0)+4); _ob=u32at(_ev+4)
 assert u32at(_ob+16)==0x0817B879; w8(_ob+16,struct.pack('<I',newsym['EventScript_JpMom']))
+# プレイヤーのいえ 1かい：はじめて おりてきたら おかあさんの よこへ あるいて シューズを もらう（マップスクリプトは もとは からっぽ）
+assert u32at(mapheader(4,0)+8)==0x0817B878 and rd(0x0817B878,1)==b'\x00'
+w8(mapheader(4,0)+8,struct.pack('<I',newsym['gJpHouse1FMapScripts']))
 def objtmpl(lid,gfx,x,y,elev,mt,rx,ry,script,flag):
     return struct.pack('<BBBxhhBBBxHHIHxx',lid,gfx,0,x,y,elev,mt,rx|(ry<<4),0,0,script,flag)
 def bgev(x,y,kind,script): return struct.pack('<hhBBxxI',x,y,0,kind,script)
