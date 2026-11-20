@@ -223,6 +223,9 @@ def mapheader(g,n): return u32at(u32at(MAPGROUPS+4*g)+4*n)
 assert rd(0x08111AA6,2)==bytes.fromhex('0fd0'); w8(0x08111AA6,bytes.fromhex('0fe0'))
 # 「せってい」を作り直し（「けいけんち ぶんぱい」する／しない を追加、「おわる」をなくす）
 assert rd(0x08087EFC,2)==bytes.fromhex('70b5'); tramp(0x08087EFC,newsym['JpCB2_OptionsMenuFromStartMenu'])
+# ずかんの「ぶんぷ」に 主人公の いる ばしょ
+assert rd(0x08107260,4)==bytes.fromhex('2df094fb'); bl(0x08107260,newsym['Island_DexAreaCreate'])
+assert rd(0x08107324,4)==bytes.fromhex('2df014fc'); bl(0x08107324,newsym['Island_DexAreaDestroy'])
 # --- 赤フルカラーの機能
 _ew=[l for l in open(PORT+'/pb/port.map') if 'ewram_end = .' in l][0].split()[0]; assert int(_ew,16)<=0x02040000, 'EWRAM overflow '+_ew
 # island stubs live in the unused UnusedBlitBitmapRect (0x0812EEC0-0x0812F09C)
