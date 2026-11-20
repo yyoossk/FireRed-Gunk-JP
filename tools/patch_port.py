@@ -200,6 +200,8 @@ assert rd(0x08063FE2,2)==b'\x01\x23'; w8(0x08063FE2,b'\x02\x23')
 # くすり・もちもの ポケットの どうぐを ひろう・もらうとき、ポケットの なまえを だす（もとは 1〜5 しか なく スクリプトが おわっていた）
 assert rd(0x08193B44,5)==bytes.fromhex('190080 0d80'.replace(' ',''))
 w8(0x08193B44,bytes([0x05])+struct.pack('<I',newsym['EventScript_JpBufferPocketName']))
+assert rd(0x08195FD0,12)==bytes.fromhex('1900800d8021008001000601') and rd(0x0819600C,1)==b'\x02'
+w8(0x08195FD0,bytes([0x05])+struct.pack('<I',newsym['EventScript_JpBufferPutAwayPocketName']))
 # --- FRLG+ event tickets: the diploma gives the しんぴのチケット (after the National Pokédex)
 assert rd(0x081845CF,6)==bytes.fromhex('250801276c02')
 w8(0x081845CF,bytes([0x05])+struct.pack('<I',newsym['EventScript_JpDiploma'])+bytes([0x02]))
