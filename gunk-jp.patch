@@ -110,10 +110,10 @@ index 906d4a0e2..517595cae 100644
      return FALSE;
  }
 diff --git a/src/gunk_quick_ball.c b/src/gunk_quick_ball.c
-index f91c4748e..e901b63c7 100644
+index f91c4748e..f0a2e0cd5 100644
 --- a/src/gunk_quick_ball.c
 +++ b/src/gunk_quick_ball.c
-@@ -37,7 +37,7 @@
+@@ -37,16 +37,16 @@
  #define TAG_QUICK_BALL_ICON 0x6A00
  #define BALLS_POCKET (POCKET_POKE_BALLS - 1)
  #define WIDGET_X 16  // the icon's centre: screen tiles 0-3, rows 13-14
@@ -122,6 +122,27 @@ index f91c4748e..e901b63c7 100644
  
  // BG0, two rows above the action prompt. While the action menu shows, BG0 is scrolled to rows 20-39, so rows 33-34
  // are the screen's 13-14; every other page of BG0 (messages, moves) leaves them off screen. Tiles 0x2D0-0x2FF are
+ // free in BG0's block (B_WIN_SWITCH_PROMPT ends at 0x2D0, the move names start at 0x300).
+ static const struct WindowTemplate sWidgetWindow = {
+     .bg = 0,
+-    .tilemapLeft = 4,
+-    .tilemapTop = 33,
+-    .width = 4,
++    .tilemapLeft = 3,
++    .tilemapTop = 32,   /* JP port: screen rows 12-13, beside the icon and above the message box's frame */
++    .width = 6,         /* JP port: room for "L ×999" in the Japanese small font */
+     .height = 2,
+     .paletteNum = 0,
+     .baseBlock = 0x2D0,
+@@ -157,7 +157,7 @@ static void DrawWidget(void)
+         gSprites[spriteId].oam.priority = 0;
+         sIconSpriteIdPlus1 = spriteId + 1;
+     }
+-    ConvertIntToDecimalStringN(gStringVar1, count > 99 ? 99 : count, STR_CONV_MODE_LEFT_ALIGN, 2);
++    ConvertIntToDecimalStringN(gStringVar1, count > 999 ? 999 : count, STR_CONV_MODE_LEFT_ALIGN, 3);
+     StringExpandPlaceholders(gStringVar4, sText_Count);
+     FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
+     AddTextPrinterParameterized4(windowId, FONT_SMALL, 1, 2, 0, 0, sTextColors, TEXT_SKIP_DRAW, gStringVar4);
 diff --git a/src/pokemon.c b/src/pokemon.c
 index f12728568..87bb823b3 100644
 --- a/src/pokemon.c

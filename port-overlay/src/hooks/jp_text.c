@@ -10,3 +10,6 @@ const u8 gText_EndlessRepelOff[] = _("むげんスプレーを オフにした�
 const u8 gText_ExpAllOn[] = _("ぜんいんがくしゅうを オンにした！{PAUSE_UNTIL_PRESS}");
 const u8 gText_ExpAllOff[] = _("ぜんいんがくしゅうを オフにした！{PAUSE_UNTIL_PRESS}");
 const u8 gJpText_RButton[] = _("{R_BUTTON}");
+const u8 gJpText_OptionExpAll[] = _("けいけんち　ぶんぱい");
+const u8 gJpText_ExpAllDo[] = _("する");
+const u8 gJpText_ExpAllDont[] = _("しない");
