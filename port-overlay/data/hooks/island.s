@@ -60,7 +60,7 @@ Island_CallR3b:
 
 	.global Island_HelpCheck
 	.thumb_func
-Island_HelpCheck:         @ RunHelpSystemCallback: in the field L opens the party and R the bag (JP port), so no Help there
+Island_HelpCheck:         @ RunHelpSystemCallback: in the field L opens the party and R the bag (JP port), and in battles L/R never open Help
 	push {r2, r4, lr}
 	ldrh r4, [r2, #46]
 	ldr r0, [r2]
@@ -70,9 +70,10 @@ Island_HelpCheck:         @ RunHelpSystemCallback: in the field L opens the part
 	movs r0, #192
 	lsls r0, r0, #2
 	bics r4, r0
-9:	ldr r3, =Gunk_IsChoosingBattleAction
-	bl Island_CallR3b
-	cmp r0, #0
+9:	ldr r0, =0x439            @ gMain.inBattle (bit 1): no Help with L/R anywhere in a battle
+	ldrb r0, [r2, r0]
+	movs r1, #2
+	tst r0, r1
 	beq 10f
 	movs r0, #192
 	lsls r0, r0, #2
