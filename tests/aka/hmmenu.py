@@ -2,6 +2,7 @@ import sys,struct; sys.path.insert(0,'/tmp/t2'); from common import *
 from PIL import Image
 rom,mode=sys.argv[1],sys.argv[2]
 g=Game('jp','/tmp/t2/now_fresh.ss',rom=rom); g.run(10)
+sys.path.insert(0,'/tmp/blog'); from name import set_name; set_name(g); g.run(2)
 S=[]
 def sh(tag): fn=f'/tmp/t2/hm_{mode}_{len(S)}.png'; g.shot(fn); S.append(fn)
 def warp(gr,n,x,y): runscript(g,bytes([0x39,gr,n,0xFF])+struct.pack('<HH',x,y)+bytes([0x02])); g.run(300)
