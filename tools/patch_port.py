@@ -201,6 +201,11 @@ for _a in (0x080923AE, 0x080923E0):
     assert rd(_a,2)==b'\x01\x21' and rd(_a+2,4)==bl_bytes(_a+2,0x08007E74); w8(_a,b'\x00\x21')
 # ランニングシューズを はやく：StartRunningAnim の はやさ MOVE_SPEED_FAST_1(8フレームで1マス) -> FAST_2(6フレーム、自転車と同じ)
 assert rd(0x08063FE2,2)==b'\x01\x23'; w8(0x08063FE2,b'\x02\x23')
+# はしる アニメ（sAnim_RunSouth/North/West/East）の コマの ながさ 5,3,5,3 -> 3,3,3,3。
+# 1マス 6フレームに したので、5 の ままだと 1歩の あいだ ほとんど 足を そろえた コマで すべって 見えた
+for _a in (0x083627A8, 0x083627BC, 0x083627D0, 0x083627E4):
+    for _k in (0, 8):
+        assert rd(_a+_k+2,1)[0] & 0x3F == 5; w8(_a+_k+2, bytes([(rd(_a+_k+2,1)[0] & 0xC0) | 3]))
 # くすり・もちもの ポケットの どうぐを ひろう・もらうとき、ポケットの なまえを だす（もとは 1〜5 しか なく スクリプトが おわっていた）
 assert rd(0x08193B44,5)==bytes.fromhex('190080 0d80'.replace(' ',''))
 w8(0x08193B44,bytes([0x05])+struct.pack('<I',newsym['EventScript_JpBufferPocketName']))
