@@ -260,12 +260,24 @@ assert rd(0x0816A473,5)==bytes.fromhex('04a4391908'); w8(0x0816A473,b'\x04'+stru
 # --- メニューから パソコン (start menu item 9)
 tramp(0x0806E51C,newsym['JpSetUpStartMenu_NormalField'])
 assert rd(0x0806EB00,4)==bytes.fromhex('00b50848'); tramp(0x0806EB00,newsym['JpStartMenu_FadeScreenIfLeavingOverworld'])
-_na=alloc(rd(0x08366B34,72)+struct.pack('<II',newsym['gJpText_MenuPC'],newsym['JpStartMenuPcCallback']|1))
+_na=alloc(rd(0x08366B34,72)+struct.pack('<IIIIII',newsym['gJpText_MenuPC'],newsym['JpStartMenuPcCallback']|1,newsym['gJpText_MenuFly'],newsym['JpStartMenuFlyCallback']|1,newsym['gJpText_MenuFlash'],newsym['JpStartMenuFlashCallback']|1))
 for _r in (0x0806E708,0x0806EAE0,0x0806EB60):
     assert u32at(_r)==0x08366B34; w8(_r,struct.pack('<I',_na))
-_nd=alloc(rd(0x08366B84,36)+struct.pack('<I',newsym['gJpStartMenuDesc_PC']))
+_nd=alloc(rd(0x08366B84,36)+struct.pack('<III',newsym['gJpStartMenuDesc_PC'],newsym['gJpStartMenuDesc_Fly'],newsym['gJpStartMenuDesc_Flash']))
 for _r in (0x0806E8A4,0x0806EAD4):
     assert u32at(_r)==0x08366B84; w8(_r,struct.pack('<I',_nd))
+# --- メニューに そらをとぶ・フラッシュ (hk_start_menu_hm.c)
+# メニューが 8こ いじょうなら せつめいを ださない：DoDrawStartMenu / StartCB_HandleInput の 3つの bl
+assert rd(0x0806E880,4)==bl_bytes(0x0806E880,0x080F8A18); bl(0x0806E880,newsym['Island_StartHelpDraw'])
+for _a in (0x0806EA3A,0x0806EA88):
+    assert rd(_a,4)==bl_bytes(_a,0x08113B68); bl(_a,newsym['Island_StartHelpPrint'])
+# スタートメニューの まどを 1マス ひろく（「そらをとぶ」「フラッシュ」が はみでない）：x 22 -> 21、はば 7 -> 8
+assert rd(0x080F8994,2)==bytes.fromhex('0720') and rd(0x080F89B0,2)==bytes.fromhex('1622'); w8(0x080F8994,bytes.fromhex('0820')); w8(0x080F89B0,bytes.fromhex('1522'))
+# どうくつ・たてものの なかからも とぶ：てもちの メニューの SetUpFieldMove_Fly と、とぶ マップで A のときの UNDERGROUND/INDOOR の チェック
+assert rd(0x08125340,2)==bytes.fromhex('00b5'); tramp(0x08125340,newsym['JpSetUpFieldMove_Fly'])
+assert rd(0x080C6378,8)==bytes.fromhex('042801d0082809d1'); w8(0x080C6378,bytes.fromhex('0ce0c046c046c046'))
+# メニューから とんで やめたら スタートメニューに もどる
+assert u32at(0x080C64B4)==0x08125365; w8(0x080C64B4,struct.pack('<I',newsym['JpCB2_FlyMapCancel']|1))
 assert rd(0x08193ECE,5)==bytes.fromhex('1604800000')
 w8(0x08193ECE,b'\x05'+struct.pack('<I',newsym['EventScript_JpTurnOffPC']))
 # --- ランニングシューズは おかあさんから
