@@ -43,16 +43,34 @@ static u8 CountMonsInJpBox(u8 box)
 }
 
 // ボックスの 自動きりかえ (ルビー・サファイア風): いまの ボックスが いっぱいなら つぎの あいている ボックスへ。レポートも かく
+// いっぱいかは 1フレームに 1ひきずつ しらべる（30ぴき まとめて しらべると Gunk の つめた ボックスの よみだしが おもく、
+// 16フレームごとに 1フレーム おくれて、はしると 画面や 連れ歩きが がくがく した）
+static EWRAM_DATA u8 sJpScanBox = 0;
+static EWRAM_DATA u8 sJpScanSlot = 0;
+
 static bool8 TryJpBoxAutoSwitch(void)
 {
     u8 cur, i, b;
 
-    if ((gMain.vblankCounter2 & 15) != 0 || !FlagGet(FLAG_SYS_POKEMON_GET) || GetSafariZoneFlag()
+    if (!FlagGet(FLAG_SYS_POKEMON_GET) || GetSafariZoneFlag()
      || QL_IS_PLAYBACK_STATE || ArePlayerFieldControlsLocked())
         return FALSE;
     cur = StorageGetCurrentBox();
-    if (cur >= JP_BOXES || CountMonsInJpBox(cur) < IN_BOX_COUNT)
+    if (cur >= JP_BOXES)
         return FALSE;
+    if (cur != sJpScanBox || sJpScanSlot >= IN_BOX_COUNT)
+    {
+        sJpScanBox = cur;
+        sJpScanSlot = 0;
+    }
+    if (GetBoxMonDataAt(cur, sJpScanSlot, MON_DATA_SPECIES) == SPECIES_NONE)
+    {
+        sJpScanSlot = 0;
+        return FALSE;
+    }
+    if (++sJpScanSlot < IN_BOX_COUNT)
+        return FALSE;
+    sJpScanSlot = 0;
     for (i = 1; i < JP_BOXES; i++)
     {
         b = (cur + i) % JP_BOXES;
