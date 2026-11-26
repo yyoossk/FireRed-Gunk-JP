@@ -271,6 +271,21 @@ for _r in (0x0806E708,0x0806EAE0,0x0806EB60):
 _nd=alloc(rd(0x08366B84,36)+struct.pack('<III',newsym['gJpStartMenuDesc_PC'],newsym['gJpStartMenuDesc_Fly'],newsym['gJpStartMenuDesc_Flash']))
 for _r in (0x0806E8A4,0x0806EAD4):
     assert u32at(_r)==0x08366B84; w8(_r,struct.pack('<I',_nd))
+# --- ずかんの さいしょの メニューに「いまいる ばしょ」(hk_dex_here.c)
+_here=struct.pack('<II',newsym['gJpText_DexHere'],15)
+_ki=alloc(rd(0x0840C704,8*17)+_here+rd(0x0840C704+8*17,8*2))      # カントー：「ちいさい じゅん」の あと
+_ni=alloc(rd(0x0840C7B4,8*18)+_here+rd(0x0840C7B4+8*18,8*2))      # ぜんこく
+_kt=bytearray(rd(0x0840C79C,0x18)); _kt[0:4]=struct.pack('<I',_ki); _kt[0xC]+=1; _kt=alloc(bytes(_kt))
+_nt=bytearray(rd(0x0840C854,0x18)); _nt[0:4]=struct.pack('<I',_ni); _nt[0xC]+=1; _nt=alloc(bytes(_nt))
+assert u32at(0x08103C40)==0x0840C79C and u32at(0x08103B40)==0x0840C854
+w8(0x08103C40,struct.pack('<I',_kt)); w8(0x08103B40,struct.pack('<I',_nt))
+for _lit,_src in ((0x08103798,0x0840C86C),(0x0810377C,0x0840C87C)):   # スクロールの やじるし：さいごの いちを 1つ ふやす
+    assert u32at(_lit)==_src
+    _ar=bytearray(rd(_src,16)); _ar[8]+=1; w8(_lit,struct.pack('<I',alloc(bytes(_ar))))
+assert u32at(0x08103CDC)==0x0840C88C   # えらんでいる ものの アイコン：15ばんめ（くさむらの アイコン）を たす
+w8(0x08103CDC,struct.pack('<I',alloc(rd(0x0840C88C,8*15)+rd(0x0840C88C,8))))
+assert rd(0x081037A4,4)==bl_bytes(0x081037A4,0x08107B80); bl(0x081037A4,newsym['Island_DexTopMenuInput'])
+
 # --- メニューに そらをとぶ・フラッシュ (hk_start_menu_hm.c)
 # メニューが 8こ いじょうなら せつめいを ださない：DoDrawStartMenu / StartCB_HandleInput の 3つの bl
 assert rd(0x0806E880,4)==bl_bytes(0x0806E880,0x080F8A18); bl(0x0806E880,newsym['Island_StartHelpDraw'])

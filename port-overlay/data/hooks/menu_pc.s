@@ -54,3 +54,19 @@ gJpStartMenuDesc_Fly::
 gJpStartMenuDesc_Flash::
 	.string "くらい　ばしょを\n"
 	.string "あかるく　てらす$"
+gJpText_DexHere::
+	.string "いまいる　ばしょ$"
+gJpText_DexHereTitle::
+	.string "の　ポケモン$"
+gJpText_DexHereNone::
+	.string "やせいの　ポケモンは　いない$"
+gJpText_DexHereLand::
+	.string "くさむら$"
+gJpText_DexHereWater::
+	.string "なみのり$"
+gJpText_DexHereRock::
+	.string "いわくだき$"
+gJpText_DexHereFish::
+	.string "つり$"
+gJpText_DexHereUnknown::
+	.string "？？？？？$"
