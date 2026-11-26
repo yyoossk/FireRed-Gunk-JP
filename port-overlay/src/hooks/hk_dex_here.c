@@ -1,6 +1,7 @@
 #include "global.h"
 #include "gflib.h"
 #include "list_menu.h"
+#include "script.h"
 #include "data.h"
 #include "menu.h"
 #include "fieldmap.h"
@@ -97,51 +98,57 @@ static void BuildLines(struct JpHereLine *sJpHereLines)
     }
 }
 
-static void PrintMon(u8 win, u16 species, u8 x, u8 y)
+struct JpHereColors { u8 normal[3]; u8 gray[3]; u8 label[3]; };
+// ずかんの パレット：1 くろ・3 かげ、12 はいいろ・11 うすい かげ、14 あか（「さくいん」と おなじ）
+static const struct JpHereColors sDexColors = {{0, 1, 3}, {0, 12, 11}, {0, 14, 15}};
+// フィールドの まど（パレット 15）：2 こい はいいろ・3 うすい はいいろ、4 あか
+static const struct JpHereColors sFieldColors = {{1, 2, 3}, {1, 3, 1}, {1, 4, 5}};
+
+static void PrintMon(u8 win, const struct JpHereColors *c, u16 species, u8 x, u8 y)
 {
-    // ずかんの パレット：1 くろ・3 かげ、12 はいいろ・11 うすい かげ
-    static const u8 white[] = {TEXT_COLOR_TRANSPARENT, 1, 3};
-    static const u8 gray[] = {TEXT_COLOR_TRANSPARENT, 12, 11};
     u16 dexNum = SpeciesToNationalPokedexNum(species);
 
     if (GetSetPokedexFlag(dexNum, FLAG_GET_CAUGHT))
-        AddTextPrinterParameterized4(win, FONT_NORMAL, x, y, 0, 0, white, TEXT_SKIP_DRAW, JpSpeciesNames[species]);
+        AddTextPrinterParameterized4(win, FONT_NORMAL, x, y, 0, 0, c->normal, TEXT_SKIP_DRAW, JpSpeciesNames[species]);
     else if (GetSetPokedexFlag(dexNum, FLAG_GET_SEEN))
-        AddTextPrinterParameterized4(win, FONT_NORMAL, x, y, 0, 0, gray, TEXT_SKIP_DRAW, JpSpeciesNames[species]);
+        AddTextPrinterParameterized4(win, FONT_NORMAL, x, y, 0, 0, c->gray, TEXT_SKIP_DRAW, JpSpeciesNames[species]);
     else
-        AddTextPrinterParameterized4(win, FONT_NORMAL, x, y, 0, 0, gray, TEXT_SKIP_DRAW, gJpText_DexHereUnknown);
+        AddTextPrinterParameterized4(win, FONT_NORMAL, x, y, 0, 0, c->gray, TEXT_SKIP_DRAW, gJpText_DexHereUnknown);
 }
 
-static void Draw(u8 win)
+static void DrawList(u8 win, const struct JpHereColors *c, u8 fill)
 {
     struct JpHereLine sJpHereLines[MAX_LINES];
-    static const u8 white[] = {TEXT_COLOR_TRANSPARENT, 1, 3};
-    static const u8 label[] = {TEXT_COLOR_TRANSPARENT, 14, 15};   // あか（さくいん などの みだしと おなじ）
     u8 name[32];
     u8 i;
 
     BuildLines(sJpHereLines);
-    FillWindowPixelBuffer(win, PIXEL_FILL(0));
+    FillWindowPixelBuffer(win, PIXEL_FILL(fill));
     GetMapName(name, gMapHeader.regionMapSectionId, 0);
     StringCopy(gStringVar4, name);
     StringAppend(gStringVar4, gJpText_DexHereTitle);
-    AddTextPrinterParameterized4(win, FONT_NORMAL, 4, 2, 0, 0, white, TEXT_SKIP_DRAW, gStringVar4);
+    AddTextPrinterParameterized4(win, FONT_NORMAL, 4, 2, 0, 0, c->normal, TEXT_SKIP_DRAW, gStringVar4);
     if (sJpHereNumLines == 0)
-        AddTextPrinterParameterized4(win, FONT_NORMAL, 4, 2 + ROW_H * 2, 0, 0, white, TEXT_SKIP_DRAW, gJpText_DexHereNone);
+        AddTextPrinterParameterized4(win, FONT_NORMAL, 4, 2 + ROW_H * 2, 0, 0, c->normal, TEXT_SKIP_DRAW, gJpText_DexHereNone);
     for (i = 0; i < ROWS_SHOWN && sJpHereScroll + i < sJpHereNumLines; i++)
     {
         struct JpHereLine *l = &sJpHereLines[sJpHereScroll + i];
         u8 y = 2 + ROW_H * (i + 1);
         if ((l->a & 0xF000) == 0xF000)
-            AddTextPrinterParameterized4(win, FONT_NORMAL, 4, y, 0, 0, label, TEXT_SKIP_DRAW, sSectionNames[l->a & 3]);
+            AddTextPrinterParameterized4(win, FONT_NORMAL, 4, y, 0, 0, c->label, TEXT_SKIP_DRAW, sSectionNames[l->a & 3]);
         else
         {
-            PrintMon(win, l->a, 16, y);
+            PrintMon(win, c, l->a, 16, y);
             if (l->b != 0)
-                PrintMon(win, l->b, 88, y);
+                PrintMon(win, c, l->b, 88, y);
         }
     }
     CopyWindowToVram(win, COPYWIN_FULL);
+}
+
+static void Draw(u8 win)
+{
+    DrawList(win, &sDexColors, 0);
 }
 
 static u8 ListWindow(u8 listTaskId)
@@ -190,4 +197,61 @@ s32 JpDexTopMenuInput(u8 listTaskId)
         return LIST_NOTHING_CHOSEN;
     }
     return r;
+}
+
+// ---- スタートメニューの「このばしょ」：フィールドに まどを だし、とじたら スタートメニューに もどる
+#define JpStartMenuExitCallback ((bool8 (*)(void))0x0806ECA9)
+#define JpShowStartMenu         ((void (*)(void))0x0806E9C5)
+void JpSetStdWindowBorderStyle(u8 windowId, bool8 copyToVram);
+void JpScheduleBgCopyTilemapToVram(u8 bg);
+#define JpClearStdWindowAndFrameToTransparent ((void (*)(u8, bool8))0x0810FF95)
+void FreezeObjectEvents(void);
+
+static const struct WindowTemplate sJpHereFieldWindow = {
+    .bg = 0, .tilemapLeft = 2, .tilemapTop = 1, .width = 26, .height = 16, .paletteNum = 15, .baseBlock = 0x038
+};
+
+static void Task_JpHereField(u8 taskId)
+{
+    u8 win = gTasks[taskId].data[0];
+
+    if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        JpClearStdWindowAndFrameToTransparent(win, TRUE);
+        ClearWindowTilemap(win);
+        RemoveWindow(win);
+        JpScheduleBgCopyTilemapToVram(0);
+        DestroyTask(taskId);
+        JpShowStartMenu();
+    }
+    else if (JOY_REPT(DPAD_DOWN) && sJpHereScroll + ROWS_SHOWN < sJpHereNumLines)
+    {
+        PlaySE(SE_SELECT);
+        sJpHereScroll++;
+        DrawList(win, &sFieldColors, 1);
+    }
+    else if (JOY_REPT(DPAD_UP) && sJpHereScroll > 0)
+    {
+        PlaySE(SE_SELECT);
+        sJpHereScroll--;
+        DrawList(win, &sFieldColors, 1);
+    }
+}
+
+bool8 JpStartMenuHereCallback(void)
+{
+    u8 win;
+
+    JpStartMenuExitCallback();
+    FreezeObjectEvents();
+    LockPlayerFieldControls();
+    win = AddWindow(&sJpHereFieldWindow);
+    PutWindowTilemap(win);
+    JpSetStdWindowBorderStyle(win, FALSE);
+    sJpHereScroll = 0;
+    DrawList(win, &sFieldColors, 1);
+    JpScheduleBgCopyTilemapToVram(0);
+    gTasks[CreateTask(Task_JpHereField, 80)].data[0] = win;
+    return TRUE;
 }

@@ -55,7 +55,7 @@ gJpStartMenuDesc_Flash::
 	.string "くらい　ばしょを\n"
 	.string "あかるく　てらす$"
 gJpText_DexHere::
-	.string "いまいる　ばしょ$"
+	.string "でるポケモン$"
 gJpText_DexHereTitle::
 	.string "の　ポケモン$"
 gJpText_DexHereNone::
@@ -70,3 +70,13 @@ gJpText_DexHereFish::
 	.string "つり$"
 gJpText_DexHereUnknown::
 	.string "？？？？？$"
+gJpText_MenuHm::
+	.string "ひでんわざ$"
+gJpText_MenuHere::
+	.string "でるポケモン$"
+gJpStartMenuDesc_Hm::
+	.string "そらをとぶ　や　フラッシュを\n"
+	.string "つかう$"
+gJpStartMenuDesc_Here::
+	.string "いまいる　ばしょで　でる\n"
+	.string "やせいの　ポケモンを　みる$"
