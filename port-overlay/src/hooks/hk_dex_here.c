@@ -4,6 +4,7 @@
 #include "script.h"
 #include "data.h"
 #include "menu.h"
+#include "menu_indicators.h"
 #include "fieldmap.h"
 #include "pokedex.h"
 #include "pokemon.h"
@@ -40,6 +41,32 @@ struct JpHereLine { u16 a, b; };
 static EWRAM_DATA bool8 sJpHereActive = FALSE;
 static EWRAM_DATA u8 sJpHereScroll = 0;
 static EWRAM_DATA u8 sJpHereNumLines = 0;
+static EWRAM_DATA u8 sJpHereArrows = 0xFF;
+static EWRAM_DATA u16 sJpHereScroll16 = 0;
+
+#define JP_HERE_ARROW_TAG 0x6C10
+
+// まどに はいりきらない ときは うえ・したの やじるしを だす（スクロール できる ことが わかるように）
+static void JpHereArrowsUpdate(void)
+{
+    sJpHereScroll16 = sJpHereScroll;
+}
+
+static void JpHereArrowsAdd(s32 x, s32 top, s32 bottom)
+{
+    sJpHereScroll16 = sJpHereScroll;
+    sJpHereArrows = 0xFF;
+    if (sJpHereNumLines > ROWS_SHOWN)
+        sJpHereArrows = AddScrollIndicatorArrowPairParameterized(SCROLL_ARROW_UP, x, top, bottom,
+                            sJpHereNumLines - ROWS_SHOWN, JP_HERE_ARROW_TAG, JP_HERE_ARROW_TAG, &sJpHereScroll16);
+}
+
+static void JpHereArrowsRemove(void)
+{
+    if (sJpHereArrows != 0xFF)
+        RemoveScrollIndicatorArrowPair(sJpHereArrows);
+    sJpHereArrows = 0xFF;
+}
 
 static const u8 *const sSectionNames[] = {gJpText_DexHereLand, gJpText_DexHereWater, gJpText_DexHereRock, gJpText_DexHereFish};
 
@@ -167,18 +194,21 @@ s32 JpDexTopMenuInput(u8 listTaskId)
         {
             PlaySE(SE_SELECT);
             sJpHereActive = FALSE;
+            JpHereArrowsRemove();
             RedrawListMenu(listTaskId);
         }
         else if (JOY_REPT(DPAD_DOWN) && sJpHereScroll + ROWS_SHOWN < sJpHereNumLines)
         {
             PlaySE(SE_SELECT);
             sJpHereScroll++;
+            JpHereArrowsUpdate();
             Draw(ListWindow(listTaskId));
         }
         else if (JOY_REPT(DPAD_UP) && sJpHereScroll > 0)
         {
             PlaySE(SE_SELECT);
             sJpHereScroll--;
+            JpHereArrowsUpdate();
             Draw(ListWindow(listTaskId));
         }
         gMain.newKeys = 0;
@@ -193,6 +223,7 @@ s32 JpDexTopMenuInput(u8 listTaskId)
         sJpHereScroll = 0;
         sJpHereActive = TRUE;
         Draw(ListWindow(listTaskId));
+        JpHereArrowsAdd(156, 40, 138);
         gMain.newKeys = 0;
         return LIST_NOTHING_CHOSEN;
     }
@@ -218,6 +249,7 @@ static void Task_JpHereField(u8 taskId)
     if (JOY_NEW(A_BUTTON | B_BUTTON))
     {
         PlaySE(SE_SELECT);
+        JpHereArrowsRemove();
         JpClearStdWindowAndFrameToTransparent(win, TRUE);
         ClearWindowTilemap(win);
         RemoveWindow(win);
@@ -229,12 +261,14 @@ static void Task_JpHereField(u8 taskId)
     {
         PlaySE(SE_SELECT);
         sJpHereScroll++;
+        JpHereArrowsUpdate();
         DrawList(win, &sFieldColors, 1);
     }
     else if (JOY_REPT(DPAD_UP) && sJpHereScroll > 0)
     {
         PlaySE(SE_SELECT);
         sJpHereScroll--;
+        JpHereArrowsUpdate();
         DrawList(win, &sFieldColors, 1);
     }
 }
@@ -251,6 +285,7 @@ bool8 JpStartMenuHereCallback(void)
     JpSetStdWindowBorderStyle(win, FALSE);
     sJpHereScroll = 0;
     DrawList(win, &sFieldColors, 1);
+    JpHereArrowsAdd(200, 32, 128);
     JpScheduleBgCopyTilemapToVram(0);
     gTasks[CreateTask(Task_JpHereField, 80)].data[0] = win;
     return TRUE;

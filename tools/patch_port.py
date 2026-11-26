@@ -292,7 +292,7 @@ assert rd(0x0806E880,4)==bl_bytes(0x0806E880,0x080F8A18); bl(0x0806E880,newsym['
 for _a in (0x0806EA3A,0x0806EA88):
     assert rd(_a,4)==bl_bytes(_a,0x08113B68); bl(_a,newsym['Island_StartHelpPrint'])
 # スタートメニューの まどを 2マス ひろく（「でるポケモン」が はみでない）：x 22 -> 20、はば 7 -> 9（タイルは 0x13D から 9x17 = 0x1D6 まで）
-assert rd(0x080F8994,2)==bytes.fromhex('0720') and rd(0x080F89B0,2)==bytes.fromhex('1622'); w8(0x080F8994,bytes.fromhex('0920')); w8(0x080F89B0,bytes.fromhex('1422'))
+assert rd(0x080F8994,2)==bytes.fromhex('0720') and rd(0x080F89B0,2)==bytes.fromhex('1622'); w8(0x080F8994,bytes.fromhex('0d20')); w8(0x080F89B0,bytes.fromhex('1022'))
 # どうくつ・たてものの なかからも とぶ：てもちの メニューの SetUpFieldMove_Fly と、とぶ マップで A のときの UNDERGROUND/INDOOR の チェック
 assert rd(0x08125340,2)==bytes.fromhex('00b5'); tramp(0x08125340,newsym['JpSetUpFieldMove_Fly'])
 assert rd(0x080C6378,8)==bytes.fromhex('042801d0082809d1'); w8(0x080C6378,bytes.fromhex('0ce0c046c046c046'))

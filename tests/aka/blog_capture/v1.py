@@ -1,0 +1,16 @@
+exec(open('/tmp/rc/base.py').read())
+def idx(g,item):
+    n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n]); return order.index(item)
+for rom,st,tag in ((ROM,POST,'n'),(ROM151,'/tmp/rc/post151.ss','s')):
+    g=new(st,rom=rom); warp(g,3,30,14,20)
+    g.tap('S'); g.run(40); shot(g,f'v_{tag}_menu'); downs(g,idx(g,11)); g.run(10); shot(g,f'v_{tag}_menuhere')
+    g.tap('A'); g.run(40); shot(g,f'v_{tag}_here'); g.cmd('tap D 1'); g.run(10); shot(g,f'v_{tag}_here2')
+    g.tap('B'); g.run(40); shot(g,f'v_{tag}_back'); g.close()
+    g=new(st,rom=rom); warp(g,1,81,17,4)
+    g.tap('S'); g.run(40); downs(g,idx(g,10)); g.tap('A'); g.run(30); shot(g,f'v_{tag}_hm'); g.close()
+    g=new(st,rom=rom); warp(g,1,72,10,10)
+    g.tap('S'); g.run(30); g.tap('A'); g.run(150)
+    for i in range(14): g.cmd('tap D 1'); g.run(4)
+    g.run(10); shot(g,f'v_{tag}_dexmenu'); g.tap('A'); g.run(30); shot(g,f'v_{tag}_dex'); g.cmd('tap D 1'); g.run(10); shot(g,f'v_{tag}_dex2')
+    g.u8(0x02000000); g.close()
+g=new('/tmp/rc/early.ss'); g.tap('S'); g.run(40); shot(g,'v_early'); g.close()

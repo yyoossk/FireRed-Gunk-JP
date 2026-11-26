@@ -180,7 +180,7 @@ bool8 JpStartMenuHmCallback(void)
             sJpHmItems[sJpHmCount++] = 0;
         if (JpStartMenuShowFlash())
             sJpHmItems[sJpHmCount++] = 1;
-        sJpHmWin = JpCreateWindowFromRect(9, 0, 8, sJpHmCount * 2);
+        sJpHmWin = JpCreateWindowFromRect(5, 0, 8, sJpHmCount * 2);
         JpSetStdWindowBorderStyle(sJpHmWin, FALSE);
         for (i = 0; i < sJpHmCount; i++)
             JpAddTextPrinterParameterized(sJpHmWin, 2, sJpHmItems[i] == 0 ? gJpText_MenuFly : gJpText_MenuFlash, 8, 2 + 16 * i, 0xFF, NULL);
