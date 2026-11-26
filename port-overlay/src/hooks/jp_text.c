@@ -13,3 +13,4 @@ const u8 gJpText_RButton[] = _("{R_BUTTON}");
 const u8 gJpText_OptionExpAll[] = _("けいけんち　ぶんぱい");
 const u8 gJpText_ExpAllDo[] = _("する");
 const u8 gJpText_ExpAllDont[] = _("しない");
+const u8 gJpText_OptionFastHeal[] = _("かいふく　アニメ");

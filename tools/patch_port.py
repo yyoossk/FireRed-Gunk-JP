@@ -300,6 +300,12 @@ assert rd(0x080C6378,8)==bytes.fromhex('042801d0082809d1'); w8(0x080C6378,bytes.
 assert u32at(0x080C64B4)==0x08125365; w8(0x080C64B4,struct.pack('<I',newsym['JpCB2_FlyMapCancel']|1))
 assert rd(0x08193ECE,5)==bytes.fromhex('1604800000')
 w8(0x08193ECE,b'\x05'+struct.pack('<I',newsym['EventScript_JpTurnOffPC']))
+# --- ポケモンセンター：かいふくの あと しゅじんこうが したを むく（A れんだ たいさく）／せっていで かいふく アニメを とばす
+assert rd(0x08193A58,8)==bytes.fromhex('4f0f804d47190851')
+w8(0x08193A58,b'\x05'+struct.pack('<I',newsym['EventScript_JpNurseHeal']))
+for a in (0x08193AB7, 0x08193AE4):   # ReturnPkmn / PlayerWaitingInUnionRoom の さいごの msgbox Text_WeHopeToSeeYouAgain
+    assert rd(a,9)==bytes.fromhex('0f006d2e1908090403'), hex(a)
+    w8(a,b'\x05'+struct.pack('<I',newsym['EventScript_JpNurseBye']))
 # --- ランニングシューズは おかあさんから
 assert rd(0x0817F43E,11)==bytes.fromhex('166c400100292e002a9200')
 w8(0x0817F43E,b'\x04'+struct.pack('<I',newsym['EventScript_JpBrockScene'])+bytes(6))

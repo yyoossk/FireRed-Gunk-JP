@@ -27,6 +27,7 @@ enum
     MENUITEM_BUTTONMODE,
     MENUITEM_FRAMETYPE,
     MENUITEM_EXPALL,
+    MENUITEM_FASTHEAL,
     MENUITEM_COUNT
 };
 
@@ -41,8 +42,8 @@ struct JpOptionMenu
 
 #define sOptionMenuPtr (*(struct JpOptionMenu **)0x0203956C)   // JP sOptionMenuPtr (EWRAM)
 
-#define ROW_PITCH 13
-#define ROW_Y(i) ((i) * ROW_PITCH + 1)
+#define ROW_PITCH 12
+#define ROW_Y(i) ((i) * ROW_PITCH)
 
 // JP data
 #define JpBgTemplates       ((const struct BgTemplate *)0x0838E914)
@@ -55,17 +56,19 @@ extern const u8 gJpText_TextSpeedInstant[];
 extern const u8 gJpText_OptionExpAll[];
 extern const u8 gJpText_ExpAllDo[];
 extern const u8 gJpText_ExpAllDont[];
+extern const u8 gJpText_OptionFastHeal[];
 bool8 FlagGet(u16 id);
 u8 FlagSet(u16 id);
 u8 FlagClear(u16 id);
 #define FLAG_GUNK_EXP_ALL_ON 0x4A8
+#define FLAG_JP_FAST_HEAL 0x4AB   // ポケモンセンターの かいふく アニメを みない
 
-static const u16 sItemCounts[MENUITEM_COUNT] = {4, 2, 2, 2, 3, 10, 2};
+static const u16 sItemCounts[MENUITEM_COUNT] = {4, 2, 2, 2, 3, 10, 2, 2};
 
 static const u8 *const sItemNames[MENUITEM_COUNT] =
 {
     (const u8 *)0x083DBCAA, (const u8 *)0x083DBCB3, (const u8 *)0x083DBCBC, (const u8 *)0x083DBCC5,
-    (const u8 *)0x083DBCCA, (const u8 *)0x083DBCD1, gJpText_OptionExpAll,
+    (const u8 *)0x083DBCCA, (const u8 *)0x083DBCD1, gJpText_OptionExpAll, gJpText_OptionFastHeal,
 };
 static const u8 *const sTextSpeedNames[] = {(const u8 *)0x083DBCDB, (const u8 *)0x083DBCDF, (const u8 *)0x083DBCE3, gJpText_TextSpeedInstant};
 static const u8 *const sSeeNames[] = {(const u8 *)0x083DBCE7, (const u8 *)0x083DBCEB};   // みる／みない
@@ -119,6 +122,7 @@ void JpCB2_OptionsMenuFromStartMenu(void)
     sOptionMenuPtr->option[MENUITEM_BUTTONMODE] = gSaveBlock2Ptr->optionsButtonMode;
     sOptionMenuPtr->option[MENUITEM_FRAMETYPE] = gSaveBlock2Ptr->optionsWindowFrameType;
     sOptionMenuPtr->option[MENUITEM_EXPALL] = FlagGet(FLAG_GUNK_EXP_ALL_ON) ? 0 : 1;
+    sOptionMenuPtr->option[MENUITEM_FASTHEAL] = FlagGet(FLAG_JP_FAST_HEAL) ? 1 : 0;
     for (i = 0; i < MENUITEM_COUNT; i++)
     {
         if (sOptionMenuPtr->option[i] > sItemCounts[i] - 1)
@@ -241,6 +245,7 @@ static void BufferOptionMenuString(u8 selection)
     case MENUITEM_SOUND:       s = sSoundNames[v]; break;
     case MENUITEM_BUTTONMODE:  s = sButtonNames[v]; break;
     case MENUITEM_EXPALL:      s = sExpAllNames[v]; break;
+    case MENUITEM_FASTHEAL:    s = sSeeNames[v]; break;
     case MENUITEM_FRAMETYPE:
         StringCopy(str, JpText_FrameType);
         ConvertIntToDecimalStringN(buf, v + 1, 1, 2);
@@ -359,6 +364,10 @@ static void CloseAndSaveOptionMenu(u8 taskId)
         FlagSet(FLAG_GUNK_EXP_ALL_ON);
     else
         FlagClear(FLAG_GUNK_EXP_ALL_ON);
+    if (sOptionMenuPtr->option[MENUITEM_FASTHEAL] == 1)
+        FlagSet(FLAG_JP_FAST_HEAL);
+    else
+        FlagClear(FLAG_JP_FAST_HEAL);
     SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
     Free(sOptionMenuPtr);
     sOptionMenuPtr = NULL;
