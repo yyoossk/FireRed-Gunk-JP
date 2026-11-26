@@ -1,0 +1,10 @@
+exec(open('/tmp/rc/base.py').read())
+g=new(); ps=g.u32(0x03004FB0)
+def cnt(b):
+    return sum(1 for s in range(30) if g.peek(ps+4+(b*30+s)*80+0x13,1)[0]&2)
+print('cur',g.u8(ps),[cnt(b) for b in range(16)])
+g.cmd(f'poke {ps:08X} 00')
+one=bytes([0x79])+struct.pack('<HBH',16,5,0)+bytes(9)
+runscript(g,one*30+b'\x02'); g.run(100)
+print('cur',g.u8(ps),[cnt(b) for b in range(16)])
+g.close()

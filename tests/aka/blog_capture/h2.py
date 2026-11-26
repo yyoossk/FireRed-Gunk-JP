@@ -1,0 +1,5 @@
+exec(open('/tmp/rc/base.py').read())
+g=new(); g.teleport('VERMILION_CITY',24,32); g.run(60); g.face('D'); g.run(10)
+g.tap('A'); g.run(60); shot(g,'t00'); g.tap('A'); g.run(60); shot(g,'t01')
+g.tap('A'); g.run(60); shot(g,'t02'); g.tap('A'); g.run(60); shot(g,'t03')
+g.save('/tmp/rc/t_menu.ss'); g.close()

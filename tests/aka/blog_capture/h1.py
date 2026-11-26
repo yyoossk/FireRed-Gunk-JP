@@ -1,0 +1,5 @@
+exec(open('/tmp/rc/base.py').read())
+g=new(); g.teleport('VERMILION_CITY',24,32); g.run(60); print(g.pos(), g.objects()); shot(g,'v0')
+g.face('U'); g.tap('A'); g.run(60); shot(g,'v1')
+for i in range(4): g.tap('A'); g.run(50); shot(g,f'v{i+2}')
+g.close()

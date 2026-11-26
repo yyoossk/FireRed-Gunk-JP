@@ -1,0 +1,8 @@
+exec(open('/tmp/rc/base.py').read())
+g=new(); warp(g,1,81,17,4)
+g.tap('S'); g.run(40)
+n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n]); downs(g,order.index(10)); g.tap('A'); g.run(30); g.tap('A'); g.run(200)
+for k in 'LLLLLLLLLLLLLL': g.cmd(f'tap {k} 1'); g.run(24)
+g.cmd('tap U 1')
+for i in range(8): g.run(15); shot(g,f'fi{i}')
+g.close()

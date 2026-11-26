@@ -1,0 +1,11 @@
+exec(open('/tmp/rc/base.py').read())
+def idx(g,item):
+    n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n]); return order.index(item)
+g=new(); warp(g,1,81,17,4)
+g.tap('S'); g.run(40); downs(g,idx(g,10)); g.tap('A'); g.run(30); g.tap('A'); g.run(200)
+for i in range(12): g.tap('L'); g.run(20); shot(g,f'fl{i:02d}')
+g.close()
+g=new(); givemon(g,133); wait_idle(g)
+g.tap('S'); g.run(60); g.tap('A'); g.run(60); g.tap('A'); g.run(60)
+for i in range(132): g.cmd('tap D 1')
+g.run(40); shot(g,'d2l'); g.tap('A'); g.run(80); shot(g,'dexst2_e'); g.tap('s'); g.run(40); shot(g,'dexst2'); g.close()

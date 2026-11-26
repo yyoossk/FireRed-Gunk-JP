@@ -1,0 +1,10 @@
+exec(open('/tmp/rc/base.py').read())
+for tag,args in (('r12',(3,30,14,20)),('cave',(1,72,10,10))):
+    g=new(); warp(g,*args)
+    g.tap('S'); g.run(30); g.tap('A'); g.run(150)
+    for i in range(14): g.cmd('tap D 1'); g.run(4)
+    g.run(10); g.tap('A'); g.run(30); shot(g,f'dh_{tag}'); g.close()
+g=new(); warp(g,3,30,14,20)
+g.tap('S'); g.run(30); n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n])
+for i in range(order.index(11)): g.cmd('tap D 1'); g.run(6)
+g.tap('A'); g.run(60); shot(g,'here_field'); g.close()

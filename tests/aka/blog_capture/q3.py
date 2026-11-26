@@ -1,0 +1,5 @@
+exec(open('/tmp/rc/base.py').read())
+g=new(); setlead(g,88,moves=(58,188,85,126),lv=100,nick='ベトベター')
+warp(g,10,1,2,6,wait=200); g.face('L'); g.run(10); g.tap('A')
+g.run(50); g.tap('A'); g.run(50); g.tap('A'); g.run(50); g.tap('D'); g.run(20); shot(g,'tm_jp5')
+g.u8(0x02000000); g.close()

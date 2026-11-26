@@ -1,0 +1,20 @@
+exec(open('/tmp/rc/base.py').read())
+for rom,name in ((ROM,'title'),(VAN,'title_old')):
+    g=Game('jp', None, rom=rom); g.run(600); g.tap('A'); g.run(200); shot(g,name); g.close()
+g=new('/tmp/rc/early.ss'); g.cmd('reset'); g.run(600)
+for i in range(10):
+    g.tap('A'); g.run(60); shot(g,f'cc{i}')
+g.close()
+g=new('/tmp/rc/early.ss'); g.run(20)
+g.tap('S'); g.run(20)
+n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n]); print('order',order)
+for i in range(order.index(1)): g.cmd('tap D 1'); g.run(6)
+g.tap('A'); g.run(60); g.tap('A'); g.run(30); shot(g,'n0')
+for i in range(3): g.cmd('tap D 1'); g.run(8)
+shot(g,'nick1'); g.tap('A'); g.run(120); shot(g,'nick2'); g.close()
+g=new('/tmp/rc/early.ss'); g.setflag(0x82F, False)
+warp(g,4,0,10,2,wait=10)
+for i in range(30):
+    g.run(20); shot(g,f'mm{i:02d}')
+    if i>=8 and i%2==0: g.tap('A')
+g.close()

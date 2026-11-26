@@ -1,0 +1,12 @@
+exec(open('/tmp/rc/base.py').read())
+def idx(g,item):
+    n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n]); return order.index(item)
+g=new(); warp(g,3,30,14,20)
+g.tap('S'); g.run(40); shot(g,'hm_town'); g.close()
+g=new(); warp(g,1,81,17,4)
+g.tap('S'); g.run(40); downs(g,idx(g,10)); g.tap('A'); g.run(30); shot(g,'hm_cave')
+downs(g,1); g.tap('A'); g.run(400); shot(g,'hm_flash'); g.close()
+g=new(); warp(g,1,81,17,4)
+g.tap('S'); g.run(40); downs(g,idx(g,10)); g.tap('A'); g.run(30); g.tap('A')
+for i in range(8): g.run(40); shot(g,f'fm{i}')
+g.close()

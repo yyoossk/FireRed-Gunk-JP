@@ -1,0 +1,16 @@
+exec(open('/tmp/rc/base.py').read())
+g=new(); ps=g.u32(0x03004FB0); g.cmd(f'poke {ps:08X} 00')
+def cnt(b): return sum(1 for s in range(30) if g.peek(ps+4+(b*30+s)*80+0x13,1)[0]&2)
+one=bytes([0x79])+struct.pack('<HBH',16,5,0)+bytes(9)
+for r in range(5):
+    runscript(g,one*6+b'\x02'); g.run(60); print(r,g.u8(ps),cnt(0),cnt(1))
+for i in range(30):
+    g.run(6); shot(g,f'bv{i:02d}')
+print(g.u8(ps),cnt(0),cnt(1))
+g.close()
+g=new()
+g.tap('S'); g.run(40)
+n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n]); downs(g,order.index(10)); g.tap('A'); g.run(30); g.tap('A'); g.run(200)
+g.cmd('tap D 1'); g.run(20); g.cmd('tap D 1'); g.run(20); shot(g,'fw0')
+g.tap('B'); g.run(150); g.tap('A'); g.run(150); shot(g,'fw1'); g.cmd('tap D 1'); g.run(20); g.cmd('tap D 1'); g.run(20); shot(g,'fw2')
+g.close()

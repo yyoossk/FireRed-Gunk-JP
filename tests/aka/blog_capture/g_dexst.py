@@ -1,0 +1,10 @@
+exec(open('/tmp/rc/base.py').read())
+for n,tag in ((1,'dexst1'),(133,'dexst2'),(129,'dexarea')):
+    g=new(); givemon(g,133); givemon(g,129); wait_idle(g)
+    if tag=='dexarea': warp(g,3,0,10,10)
+    g.tap('S'); g.run(60); g.tap('A'); g.run(60); g.tap('A'); g.run(60)
+    for i in range(n-1): g.cmd('tap D 1')
+    g.run(40); g.tap('A'); g.run(80); shot(g,tag+'_e')
+    if tag=='dexarea': g.tap('A'); g.run(60); shot(g,tag)
+    else: g.tap('s'); g.run(40); shot(g,tag)
+    g.close()
