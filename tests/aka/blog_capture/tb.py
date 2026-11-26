@@ -1,0 +1,10 @@
+exec(open('/tmp/rc/base.py').read())
+import walker
+g=new('/tmp/rc/early.ss'); warp(g,10,1,4,6,wait=200); print('early objs',[(o['lid'],o['x'],o['y']) for o in walker._events(g)['objs']]); shot(g,'tb_early'); g.close()
+g=new(); warp(g,10,1,2,6,wait=200); g.face('L'); g.run(10); g.tap('A')
+g.run(50); g.tap('A'); g.run(60); shot(g,'tb_shop0')
+for i in range(52): g.cmd('tap D 1'); g.run(4)
+g.run(20); shot(g,'tb_shop_end')
+for i in range(12): g.cmd('tap U 1'); g.run(4)
+g.run(20); shot(g,'tb_shop_mid')
+g.u8(0x02000000); g.close()
