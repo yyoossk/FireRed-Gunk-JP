@@ -28,6 +28,7 @@ enum
     MENUITEM_FRAMETYPE,
     MENUITEM_EXPALL,
     MENUITEM_FASTHEAL,
+    MENUITEM_UNSEEN,
     MENUITEM_COUNT
 };
 
@@ -57,31 +58,36 @@ extern const u8 gJpText_OptionExpAll[];
 extern const u8 gJpText_ExpAllDo[];
 extern const u8 gJpText_ExpAllDont[];
 extern const u8 gJpText_OptionFastHeal[];
+extern const u8 gJpText_OptionUnseen[];
+extern const u8 gJpText_UnseenHide[];
+extern const u8 gJpText_UnseenShow[];
 bool8 FlagGet(u16 id);
 u8 FlagSet(u16 id);
 u8 FlagClear(u16 id);
 #define FLAG_GUNK_EXP_ALL_ON 0x4A8
-#define FLAG_JP_FAST_HEAL 0x4AB   // ポケモンセンターの かいふく アニメを みない
+#define FLAG_JP_FAST_HEAL 0x4AB
+#define FLAG_JP_HERE_SHOW_UNSEEN 0x4AC   // ここででるポケモン：みかけてない ポケモンも なまえを だす   // ポケモンセンターの かいふく アニメを みない
 
-static const u16 sItemCounts[MENUITEM_COUNT] = {4, 2, 2, 2, 3, 10, 2, 2};
+static const u16 sItemCounts[MENUITEM_COUNT] = {4, 2, 2, 2, 3, 10, 2, 2, 2};
 
 static const u8 *const sItemNames[MENUITEM_COUNT] =
 {
     (const u8 *)0x083DBCAA, (const u8 *)0x083DBCB3, (const u8 *)0x083DBCBC, (const u8 *)0x083DBCC5,
-    (const u8 *)0x083DBCCA, (const u8 *)0x083DBCD1, gJpText_OptionExpAll, gJpText_OptionFastHeal,
+    (const u8 *)0x083DBCCA, (const u8 *)0x083DBCD1, gJpText_OptionExpAll, gJpText_OptionFastHeal, gJpText_OptionUnseen,
 };
 static const u8 *const sTextSpeedNames[] = {(const u8 *)0x083DBCDB, (const u8 *)0x083DBCDF, (const u8 *)0x083DBCE3, gJpText_TextSpeedInstant};
 static const u8 *const sSeeNames[] = {(const u8 *)0x083DBCE7, (const u8 *)0x083DBCEB};   // みる／みない
 static const u8 *const sStyleNames[] = {(const u8 *)0x083DBCEF, (const u8 *)0x083DBCF4};
 static const u8 *const sExpAllNames[] = {gJpText_ExpAllDo, gJpText_ExpAllDont};
+static const u8 *const sUnseenNames[] = {gJpText_UnseenHide, gJpText_UnseenShow};
 static const u8 *const sSoundNames[] = {(const u8 *)0x083DBCF9, (const u8 *)0x083DBCFE};
 static const u8 *const sButtonNames[] = {(const u8 *)0x083DBD07, (const u8 *)0x083DBD0F, (const u8 *)0x083DBD0B};
 
 static const struct WindowTemplate sWinTemplates[] =
 {
-    { .bg = 1, .tilemapLeft = 2, .tilemapTop = 3, .width = 26, .height = 2, .paletteNum = 1, .baseBlock = 2 },
-    { .bg = 0, .tilemapLeft = 2, .tilemapTop = 7, .width = 26, .height = 12, .paletteNum = 1, .baseBlock = 0x36 },
-    { .bg = 2, .tilemapLeft = 0, .tilemapTop = 0, .width = 30, .height = 2, .paletteNum = 15, .baseBlock = 0x16e },
+    { .bg = 1, .tilemapLeft = 2, .tilemapTop = 1, .width = 26, .height = 2, .paletteNum = 1, .baseBlock = 2 },
+    { .bg = 0, .tilemapLeft = 2, .tilemapTop = 5, .width = 26, .height = 14, .paletteNum = 1, .baseBlock = 0x36 },
+    { .bg = 2, .tilemapLeft = 0, .tilemapTop = 0, .width = 1, .height = 1, .paletteNum = 15, .baseBlock = 0x1A2 },   // つかっていない
     DUMMY_WIN_TEMPLATE
 };
 
@@ -123,6 +129,7 @@ void JpCB2_OptionsMenuFromStartMenu(void)
     sOptionMenuPtr->option[MENUITEM_FRAMETYPE] = gSaveBlock2Ptr->optionsWindowFrameType;
     sOptionMenuPtr->option[MENUITEM_EXPALL] = FlagGet(FLAG_GUNK_EXP_ALL_ON) ? 0 : 1;
     sOptionMenuPtr->option[MENUITEM_FASTHEAL] = FlagGet(FLAG_JP_FAST_HEAL) ? 1 : 0;
+    sOptionMenuPtr->option[MENUITEM_UNSEEN] = FlagGet(FLAG_JP_HERE_SHOW_UNSEEN) ? 1 : 0;
     for (i = 0; i < MENUITEM_COUNT; i++)
     {
         if (sOptionMenuPtr->option[i] > sItemCounts[i] - 1)
@@ -196,19 +203,19 @@ static void PrintOptionMenuHeader(void)
 static void DrawOptionMenuBg(void)
 {
     u8 h = 2;
-    FillBgTilemapBufferRect(1, 0x1B3, 1, 2, 1, 1, 3);
-    FillBgTilemapBufferRect(1, 0x1B4, 2, 2, 0x1B, 1, 3);
-    FillBgTilemapBufferRect(1, 0x1B5, 0x1C, 2, 1, 1, 3);
-    FillBgTilemapBufferRect(1, 0x1B6, 1, 3, 1, h, 3);
-    FillBgTilemapBufferRect(1, 0x1B8, 0x1C, 3, 1, h, 3);
-    FillBgTilemapBufferRect(1, 0x1B9, 1, 5, 1, 1, 3);
-    FillBgTilemapBufferRect(1, 0x1BA, 2, 5, 0x1B, 1, 3);
-    FillBgTilemapBufferRect(1, 0x1BB, 0x1C, 5, 1, 1, 3);
-    FillBgTilemapBufferRect(1, 0x1AA, 1, 6, 1, 1, h);
-    FillBgTilemapBufferRect(1, 0x1AB, 2, 6, 0x1A, 1, h);
-    FillBgTilemapBufferRect(1, 0x1AC, 0x1C, 6, 1, 1, h);
-    FillBgTilemapBufferRect(1, 0x1AD, 1, 7, 1, 0x10, h);
-    FillBgTilemapBufferRect(1, 0x1AF, 0x1C, 7, 1, 0x10, h);
+    FillBgTilemapBufferRect(1, 0x1B3, 1, 0, 1, 1, 3);
+    FillBgTilemapBufferRect(1, 0x1B4, 2, 0, 0x1B, 1, 3);
+    FillBgTilemapBufferRect(1, 0x1B5, 0x1C, 0, 1, 1, 3);
+    FillBgTilemapBufferRect(1, 0x1B6, 1, 1, 1, h, 3);
+    FillBgTilemapBufferRect(1, 0x1B8, 0x1C, 1, 1, h, 3);
+    FillBgTilemapBufferRect(1, 0x1B9, 1, 3, 1, 1, 3);
+    FillBgTilemapBufferRect(1, 0x1BA, 2, 3, 0x1B, 1, 3);
+    FillBgTilemapBufferRect(1, 0x1BB, 0x1C, 3, 1, 1, 3);
+    FillBgTilemapBufferRect(1, 0x1AA, 1, 4, 1, 1, h);
+    FillBgTilemapBufferRect(1, 0x1AB, 2, 4, 0x1A, 1, h);
+    FillBgTilemapBufferRect(1, 0x1AC, 0x1C, 4, 1, 1, h);
+    FillBgTilemapBufferRect(1, 0x1AD, 1, 5, 1, 0x0E, h);
+    FillBgTilemapBufferRect(1, 0x1AF, 0x1C, 5, 1, 0x0E, h);
     FillBgTilemapBufferRect(1, 0x1B0, 1, 0x13, 1, 1, h);
     FillBgTilemapBufferRect(1, 0x1B1, 2, 0x13, 0x1A, 1, h);
     FillBgTilemapBufferRect(1, 0x1B2, 0x1C, 0x13, 1, 1, h);
@@ -246,6 +253,7 @@ static void BufferOptionMenuString(u8 selection)
     case MENUITEM_BUTTONMODE:  s = sButtonNames[v]; break;
     case MENUITEM_EXPALL:      s = sExpAllNames[v]; break;
     case MENUITEM_FASTHEAL:    s = sSeeNames[v]; break;
+    case MENUITEM_UNSEEN:      s = sUnseenNames[v]; break;
     case MENUITEM_FRAMETYPE:
         StringCopy(str, JpText_FrameType);
         ConvertIntToDecimalStringN(buf, v + 1, 1, 2);
@@ -261,7 +269,7 @@ static void BufferOptionMenuString(u8 selection)
 
 static void UpdateSettingSelectionDisplay(u16 selection)
 {
-    u16 y = 0x38 + ROW_Y(selection);
+    u16 y = 0x28 + ROW_Y(selection);
     SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(y, y + ROW_PITCH));
     SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(0x10, 0xE0));
 }
@@ -368,6 +376,10 @@ static void CloseAndSaveOptionMenu(u8 taskId)
         FlagSet(FLAG_JP_FAST_HEAL);
     else
         FlagClear(FLAG_JP_FAST_HEAL);
+    if (sOptionMenuPtr->option[MENUITEM_UNSEEN] == 1)
+        FlagSet(FLAG_JP_HERE_SHOW_UNSEEN);
+    else
+        FlagClear(FLAG_JP_HERE_SHOW_UNSEEN);
     SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
     Free(sOptionMenuPtr);
     sOptionMenuPtr = NULL;

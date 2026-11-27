@@ -14,3 +14,6 @@ const u8 gJpText_OptionExpAll[] = _("けいけんち　ぶんぱい");
 const u8 gJpText_ExpAllDo[] = _("する");
 const u8 gJpText_ExpAllDont[] = _("しない");
 const u8 gJpText_OptionFastHeal[] = _("かいふく　アニメ");
+const u8 gJpText_OptionUnseen[] = _("みてない　ポケモン");
+const u8 gJpText_UnseenHide[] = _("かくす");
+const u8 gJpText_UnseenShow[] = _("みせる");

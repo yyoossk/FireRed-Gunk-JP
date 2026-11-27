@@ -1,0 +1,16 @@
+exec(open('/tmp/rc/base.py').read())
+ed=sys.argv[1]; rom=ROM if ed=='n' else ROM151; st=POST if ed=='n' else '/tmp/rc/post151.ss'
+def here(g,tag):
+    menu_go(g,11); g.tap('A'); g.run(50); shot(g,tag); g.tap('B'); g.run(40); g.tap('B'); g.run(40)
+    menu_go(g,0); g.tap('A'); g.run(150)
+    for i in range(14): g.cmd('tap D 1'); g.run(4)
+    g.run(10); g.tap('A'); g.run(30); shot(g,tag+'d'); g.tap('B'); g.run(30); g.tap('B'); g.run(120); g.tap('B'); g.run(60)
+g=new(st,rom=rom); warp(g,1,72,10,10)
+here(g,f'un_{ed}0')
+menu_go(g,5); g.tap('A'); g.run(90); shot(g,f'un_{ed}opt0')
+for i in range(8): g.cmd('tap D 1'); g.run(8); shot(g,f'un_{ed}row{i+1}')
+g.cmd('tap R 1'); g.run(10); shot(g,f'un_{ed}opt1')
+g.tap('B'); g.run(120); print(ed,'flag',g.getflag(0x4AC))
+g.tap('B'); g.run(40)
+here(g,f'un_{ed}1')
+g.u8(0x02000000); g.close()

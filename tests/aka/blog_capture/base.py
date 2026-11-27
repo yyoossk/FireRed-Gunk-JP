@@ -54,3 +54,11 @@ def setslot(g, slot, sp, moves, lv=50, nick=None):
     P=g.R['party']; own=g.peek(P,100); otid=struct.unpack_from('<I',own,4)[0]
     m=bytearray(mkmon.mon(sp, level=lv, nick=nick or 'ポケモン', pid=0x5151+slot*7, otid=otid, moves=moves)); m[20:27]=own[20:27]
     for i,b in enumerate(m): g.cmd(f'poke {P+100*slot+i:08X} {b:02X}')
+
+def menu_go(g, item):
+    """スタートメニューを ひらいて item の ところへ（カーソルの いちを よんで うごかす）"""
+    g.tap('S'); g.run(30)
+    n=g.u8(0x02037029); order=list(g.peek(0x0203702A,9)[:n]); want=order.index(item)
+    cur=g.u8(0x02037028)
+    while cur!=want:
+        g.cmd('tap D 1' if want>cur else 'tap U 1'); g.run(6); cur=g.u8(0x02037028)
